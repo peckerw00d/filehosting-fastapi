@@ -1,13 +1,17 @@
-from email import contentmanager
+from contextlib import asynccontextmanager
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from fastapi import FastAPI
 
-from api import router as api_router
 from core.config import settings
 from core.models import db_helper
 
+from api import router as file_router
 
-@contentmanager
+import os
+
+
+@asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
 
@@ -17,10 +21,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI()
 
-app.include_router(
-    api_router,
-    prefix=settings.api.prefix,
-)
+app.include_router(file_router)
+
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+media_dir = os.path.join(base_dir, "media")
+
+
+app.mount('/media', StaticFiles(directory=media_dir), name="media")
 
 
 if __name__ == "__main__":
