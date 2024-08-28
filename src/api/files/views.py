@@ -1,10 +1,8 @@
-from distutils.command import upload
-import shutil
-from fastapi import APIRouter, Depends, File, UploadFile
-from sqlalchemy.ext.asyncio import AsyncSession
+from pathlib import Path
 
-from core.models import db_helper
-from . import services  
+import aiofiles
+from fastapi import APIRouter, File, UploadFile
+from core.config import settings
 
 
 router = APIRouter(tags=["Files"])
@@ -20,15 +18,16 @@ async def get_file(file: bytes = File(...)):
 @router.post("/upload_file")
 async def upload_file(upload_file: UploadFile = File(...)):
     upload_file.filename = upload_file.filename.lower()
-    
-    path = f"media/{upload_file.filename}"
 
-    with open(path, "wb+") as buffer:
-        shutil.copyfileobj(upload_file, buffer)
+    path = f"{settings.static.media_dir}/{upload_file.filename}"
+
+    async with aiofiles.open(path, "wb") as out_file:
+        content = await upload_file.read()  # async read
+        await out_file.write(content)  # async write
     
     return {
-        "file": upload_file,
         "file": upload_file.filename,
+        "filename": upload_file.filename,
         "path": path,
         "type": upload_file.content_type
     }

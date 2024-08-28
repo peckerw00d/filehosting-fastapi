@@ -1,5 +1,13 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import BaseModel, PostgresDsn
+import os
+from pathlib import Path
+from pyclbr import Class
+from typing import ClassVar
+from pydantic_settings import BaseSettings
+from pydantic import BaseModel
+
+class StaticDirConfig(BaseModel):
+    media_dir: str = Path(__file__).resolve().parents[1] / "media"
+
 
 class RunConfig(BaseModel):
     host: str = "0.0.0.0"
@@ -29,5 +37,7 @@ class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig = DatabaseConfig()
+    static: StaticDirConfig = StaticDirConfig()
+    
 
 settings = Settings()

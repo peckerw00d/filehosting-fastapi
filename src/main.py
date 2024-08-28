@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import os
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 from fastapi import FastAPI
@@ -8,7 +9,6 @@ from core.models import db_helper
 
 from api import router as file_router
 
-import os
 
 
 @asynccontextmanager
@@ -24,11 +24,7 @@ app = FastAPI()
 app.include_router(file_router)
 
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
-media_dir = os.path.join(base_dir, "media")
-
-
-app.mount('/media', StaticFiles(directory=media_dir), name="media")
+app.mount('/media', StaticFiles(directory=settings.static.media_dir), name="media")
 
 
 if __name__ == "__main__":
