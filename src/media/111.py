@@ -20,5 +20,4 @@ def perfect_num(total_num):
     
     print(perfect_nums)
 
-# Пример использования
 perfect_num(10000)
