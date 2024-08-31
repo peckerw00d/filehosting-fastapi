@@ -1,5 +1,7 @@
 from typing import List
 from fastapi import File, UploadFile
+from httpx import delete
+from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models import FileModel
@@ -7,11 +9,27 @@ from core.config import settings
 
 import aiofiles
 
+from core.schemas.files import FileDelete
+
 
 async def read_file_service(file: bytes = File(...)):
     content = file.decode("utf-8")
     lines = content.split("\n")
     return {"data": lines}
+
+
+async def get_files_service(session: AsyncSession):
+    stmt = select(FileModel).order_by(FileModel.id)
+    result: Result = await session.execute(stmt)
+    files = Result.scalars(result).all()
+    return list(files)
+
+
+async def get_file_service(
+        session: AsyncSession,
+        file_id: int,
+) -> File | None:
+    return await session.get(FileModel, file_id) 
 
 
 async def upload_file_service(
@@ -57,7 +75,7 @@ async def upload_multiple_files_service(
         file_metadata = FileModel(
             filename=upload_file.filename,
             path=path,
-            content_type=upload_file.content_type
+            content_type=upload_file.content_type   
         )    
 
         session.add(file_metadata)
