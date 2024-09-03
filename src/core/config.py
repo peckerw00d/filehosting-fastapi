@@ -1,9 +1,17 @@
+from dotenv import load_dotenv
 import os
 from pathlib import Path
-from pyclbr import Class
-from typing import ClassVar
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
+
+
+load_dotenv()
+
+
+class MinIOConfig(BaseModel):
+    access_key = os.getenv("MINIO_ACCESS_KEY")
+    secret_key = os.getenv("MINIO_SECRET_KEY")
+
 
 class StaticDirConfig(BaseModel):
     media_dir: str = Path(__file__).resolve().parents[1] / "media"
@@ -28,16 +36,11 @@ class DatabaseConfig(BaseModel):
 
 
 class Settings(BaseSettings):
-    # model_config = SettingsConfigDict(
-    #     env_file=".env",
-    #     case_sensitive=False,
-    #     env_nested_delimiter="__",
-    #     env_prefix="APP_CONFIG__",
-    # )
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig = DatabaseConfig()
     static: StaticDirConfig = StaticDirConfig()
-    
+    minio: MinIOConfig = MinIOConfig()
+
 
 settings = Settings()

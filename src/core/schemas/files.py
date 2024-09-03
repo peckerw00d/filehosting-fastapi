@@ -7,8 +7,14 @@ class FileBase(BaseModel):
     path: str
     content_type: str
 
+
 class FileCreate(FileBase):
     pass
+
+
+class FileDelete(FileBase):
+    pass
+
 
 class FileResponse(FileBase):
     id: int
@@ -18,4 +24,3 @@ class FileResponse(FileBase):
         model_config = ConfigDict(
             from_attributes=True,
         )
-        

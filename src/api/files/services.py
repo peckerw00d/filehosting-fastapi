@@ -23,8 +23,8 @@ async def get_files(session: AsyncSession):
 
 
 async def upload_file(
-        session: AsyncSession,
-        file: UploadFile = File(...),
+    session: AsyncSession,
+    file: UploadFile = File(...),
 ):
     file.filename = file.filename.lower()
 
@@ -35,24 +35,22 @@ async def upload_file(
         await out_file.write(content)
 
     file_metadata = FileModel(
-        filename=file.filename,
-        path=path,
-        content_type=file.content_type
-    )    
+        filename=file.filename, path=path, content_type=file.content_type
+    )
 
     session.add(file_metadata)
     await session.commit()
     await session.refresh(file_metadata)
-    
+
     return file_metadata
 
 
 async def upload_multiple_files(
-        session: AsyncSession,
-        files: List[UploadFile] = File(...),
+    session: AsyncSession,
+    files: List[UploadFile] = File(...),
 ):
     res = []
-    
+
     for upload_file in files:
         upload_file.filename = upload_file.filename.lower()
 
@@ -65,13 +63,12 @@ async def upload_multiple_files(
         file_metadata = FileModel(
             filename=upload_file.filename,
             path=path,
-            content_type=upload_file.content_type   
-        )    
+            content_type=upload_file.content_type,
+        )
 
         session.add(file_metadata)
         await session.commit()
         await session.refresh(file_metadata)
-        
 
         res.append(file_metadata)
 
