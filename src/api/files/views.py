@@ -15,13 +15,9 @@ router = APIRouter(tags=["Files"])
 async def read_file(file: bytes = File(...)):
     return await services.read_file(file=file)
 
-
-@router.get("/get-file")
-async def get_file(
-    file: FileModel = Depends(dependencies.file_by_id)
-):
-    return await file
-
+@router.post("/")
+async def get_files(session: AsyncSession = Depends(db_helper.session_getter)):
+    return await services.get_files(session=session)
 
 @router.post("/upload-file")
 async def upload_file(
