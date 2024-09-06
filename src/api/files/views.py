@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, File, UploadFile
+from minio import Minio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.files import dependencies

@@ -9,12 +9,14 @@ load_dotenv()
 
 
 class MinIOConfig(BaseModel):
-    access_key = os.getenv("MINIO_ACCESS_KEY")
-    secret_key = os.getenv("MINIO_SECRET_KEY")
+    url: str = "localhost:9000",
+    access_key: str = os.getenv("MINIO_ACCESS_KEY"),
+    secret_key: str = os.getenv("MINIO_SECRET_KEY"),
+    bucket_name: str = "main-bucket"
 
 
 class StaticDirConfig(BaseModel):
-    media_dir: str = Path(__file__).resolve().parents[1] / "media"
+    media_dir: str = str(Path(__file__).resolve().parents[1] / "media")
 
 
 class RunConfig(BaseModel):
