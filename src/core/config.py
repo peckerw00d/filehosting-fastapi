@@ -9,10 +9,10 @@ load_dotenv()
 
 
 class MinIOConfig(BaseModel):
-    url: str = "localhost:9000",
-    access_key: str = os.getenv("MINIO_ACCESS_KEY"),
-    secret_key: str = os.getenv("MINIO_SECRET_KEY"),
-    bucket_name: str = "main-bucket"
+    endpoint: str = "localhost:9000"
+    access_key: str = os.getenv("MINIO_ACCESS_KEY")
+    secret_key: str = os.getenv("MINIO_SECRET_KEY")
+    secure: bool = False
 
 
 class StaticDirConfig(BaseModel):
@@ -25,10 +25,6 @@ class RunConfig(BaseModel):
     reload: bool = True
 
 
-class ApiPrefix(BaseModel):
-    prefix: str = "/api"
-
-
 class DatabaseConfig(BaseModel):
     url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
     echo: bool = False
@@ -39,7 +35,6 @@ class DatabaseConfig(BaseModel):
 
 class Settings(BaseSettings):
     run: RunConfig = RunConfig()
-    api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig = DatabaseConfig()
     static: StaticDirConfig = StaticDirConfig()
     minio: MinIOConfig = MinIOConfig()

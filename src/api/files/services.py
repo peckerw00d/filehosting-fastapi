@@ -12,12 +12,10 @@ import aiofiles
 
 
 client = Minio(
-    endpoint="localhost:9000",
-    # access_key=settings.minio.access_key,
-    # secret_key=settings.minio.secret_key,
-    access_key="T7Bto7HQXLmpDAQYvV6D",
-    secret_key="KyPux17p7SFYvFwY5OZ0WyHQmj6V1rdExOx4iMb1",
-    secure=False,
+    endpoint=settings.minio.endpoint,
+    access_key=settings.minio.access_key,
+    secret_key=settings.minio.secret_key,
+    secure=settings.minio.secure,
 )
 
 
