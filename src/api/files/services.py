@@ -38,9 +38,6 @@ async def upload_file(
 ):
     file.filename = file.filename.lower()
 
-    if not isinstance(settings.static.media_dir, str):
-        raise TypeError("settings.static.media_dir должен быть строкой")
-
     path = os.path.join(settings.static.media_dir, file.filename)
 
     async with aiofiles.open(path, "wb") as out_file:
@@ -53,6 +50,8 @@ async def upload_file(
         path,
     )
 
+    
+    
     file_metadata = FileModel(
         filename=file.filename, path=path, content_type=file.content_type
     )
@@ -60,7 +59,7 @@ async def upload_file(
     session.add(file_metadata)
     await session.commit()
     await session.refresh(file_metadata)
-    
+
     os.remove(path=path)
 
     return file_metadata
