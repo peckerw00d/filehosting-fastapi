@@ -6,6 +6,7 @@ from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models import FileModel
+from core.schemas import FileCreate, FileResponse
 from core.config import settings
 
 import aiofiles
@@ -50,10 +51,22 @@ async def upload_file(
         path,
     )
 
-    
-    
+    stat = client.stat_object("main-bucket", file.filename)
+
     file_metadata = FileModel(
-        filename=file.filename, path=path, content_type=file.content_type
+        filename=stat.object_name,
+        filesize=stat.size,
+        last_modified=stat.last_modified,
+        etag=stat.etag,
+        content_type=stat.content_type,
+    )
+
+    file_create_data = FileCreate(
+        filename=stat.object_name,
+        filesize=stat.size,
+        last_modified=stat.last_modified,
+        etag=stat.etag,
+        content_type=stat.content_type,
     )
 
     session.add(file_metadata)
@@ -62,7 +75,7 @@ async def upload_file(
 
     os.remove(path=path)
 
-    return file_metadata
+    return FileResponse.model_validate(file_metadata.__dict__)
 
 
 async def upload_multiple_files(
