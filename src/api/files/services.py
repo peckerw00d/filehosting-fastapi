@@ -85,20 +85,43 @@ async def upload_multiple_files(
     res = []
 
     for upload_file in files:
+
         upload_file.filename = upload_file.filename.lower()
 
-        path = f"{settings.static.media_dir}/{upload_file.filename}"
+        path = os.path.join(settings.static.media_dir, upload_file.filename)
+
+        async with aiofiles.open(path, "wb") as out_file:
+            content = await upload_file.read()
+            await out_file.write(content)
+
+        client.fput_object(
+            "main-bucket",
+            upload_file.filename,
+            path,
+        )
+
+        stat = client.stat_object("main-bucket", upload_file.filename)
 
         file_metadata = FileModel(
-            filename=upload_file.filename,
-            path=path,
-            content_type=upload_file.content_type,
+            filename=stat.object_name,
+            filesize=stat.size,
+            last_modified=stat.last_modified,
+            etag=stat.etag,
+            content_type=stat.content_type,
+        )
+
+        file_create_data = FileCreate(
+            filename=stat.object_name,
+            filesize=stat.size,
+            last_modified=stat.last_modified,
+            etag=stat.etag,
+            content_type=stat.content_type,
         )
 
         session.add(file_metadata)
         await session.commit()
         await session.refresh(file_metadata)
 
-        res.append(file_metadata)
+        res.append(FileResponse.model_validate(file_metadata.__dict__))
 
     return res

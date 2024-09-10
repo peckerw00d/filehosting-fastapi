@@ -32,7 +32,7 @@ async def upload_file(
     )
 
 
-@router.post("/upload-multiple-files")
+@router.post("/upload-multiple-files", response_model=List[FileResponse])
 async def upload_multiple_files(
     files: List[UploadFile] = File(...),
     session: AsyncSession = Depends(db_helper.session_getter),
