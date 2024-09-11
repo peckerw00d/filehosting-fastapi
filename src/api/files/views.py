@@ -16,9 +16,16 @@ async def read_file(file: bytes = File(...)):
     return await services.read_file(file=file)
 
 
-@router.post("/")
+@router.get("/", response_model=List[FileResponse])
 async def get_files(session: AsyncSession = Depends(db_helper.session_getter)):
     return await services.get_files(session=session)
+
+
+@router.get("/{file_id}", response_model=FileResponse)
+async def get_file(
+    file_id: int, session: AsyncSession = Depends(db_helper.session_getter)
+):
+    return await services.get_file(file_id=file_id, session=session)
 
 
 @router.post("/upload-file", response_model=FileResponse)
@@ -39,5 +46,16 @@ async def upload_multiple_files(
 ):
     return await services.upload_multiple_files(
         files=files,
+        session=session,
+    )
+
+
+@router.delete("/{file_id}")
+async def delete_file(
+    file_id: int,
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    return await services.delete_file(
+        file_id=file_id,
         session=session,
     )

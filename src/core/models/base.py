@@ -4,7 +4,7 @@ from sqlalchemy.orm import (
     mapped_column, 
     declared_attr
 )
-
+0
 from utils.case_convereter import camel_case_to_snake_case
 
 

@@ -26,6 +26,10 @@ async def read_file(file: bytes = File(...)):
     return {"data": lines}
 
 
+async def get_file(file_id: int, session: AsyncSession):
+    return await session.get(FileModel, file_id)
+
+
 async def get_files(session: AsyncSession):
     stmt = select(FileModel).order_by(FileModel.id)
     result: Result = await session.execute(stmt)
@@ -122,6 +126,20 @@ async def upload_multiple_files(
         await session.commit()
         await session.refresh(file_metadata)
 
+        os.remove(path=path)
+
         res.append(FileResponse.model_validate(file_metadata.__dict__))
 
     return res
+
+
+async def delete_file(file_id: int, session: AsyncSession):
+    object = await session.get(FileModel, file_id)
+
+    client.remove_object("main-bucket", object.filename)
+
+    result = await session.execute(select(FileModel).where(FileModel.id == file_id))
+    result = Result.scalar(result)
+
+    await session.delete(result)
+    await session.commit()
