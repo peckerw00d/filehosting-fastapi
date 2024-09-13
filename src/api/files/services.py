@@ -1,4 +1,6 @@
+import io
 import os
+from tempfile import NamedTemporaryFile
 from typing import List
 from fastapi import File, UploadFile
 from minio import Minio
@@ -43,16 +45,16 @@ async def upload_file(
 ):
     file.filename = file.filename.lower()
 
-    path = os.path.join(settings.static.media_dir, file.filename)
+    temp = NamedTemporaryFile(delete=False)
+    content = file.file.read()
 
-    async with aiofiles.open(path, "wb") as out_file:
-        content = await file.read()
-        await out_file.write(content)
+    with temp as f:
+        f.write(content)
 
-    client.fput_object(
+    result = client.fput_object(
         "main-bucket",
         file.filename,
-        path,
+        temp.name,
     )
 
     stat = client.stat_object("main-bucket", file.filename)
@@ -77,8 +79,6 @@ async def upload_file(
     await session.commit()
     await session.refresh(file_metadata)
 
-    os.remove(path=path)
-
     return FileResponse.model_validate(file_metadata.__dict__)
 
 
@@ -92,16 +92,16 @@ async def upload_multiple_files(
 
         upload_file.filename = upload_file.filename.lower()
 
-        path = os.path.join(settings.static.media_dir, upload_file.filename)
+        temp = NamedTemporaryFile(delete=False)
+        content = upload_file.file.read()
 
-        async with aiofiles.open(path, "wb") as out_file:
-            content = await upload_file.read()
-            await out_file.write(content)
+        with temp as f:
+            f.write(content)
 
         client.fput_object(
             "main-bucket",
             upload_file.filename,
-            path,
+            temp.name,
         )
 
         stat = client.stat_object("main-bucket", upload_file.filename)
@@ -126,8 +126,6 @@ async def upload_multiple_files(
         await session.commit()
         await session.refresh(file_metadata)
 
-        os.remove(path=path)
-
         res.append(FileResponse.model_validate(file_metadata.__dict__))
 
     return res
@@ -138,8 +136,5 @@ async def delete_file(file_id: int, session: AsyncSession):
 
     client.remove_object("main-bucket", object.filename)
 
-    result = await session.execute(select(FileModel).where(FileModel.id == file_id))
-    result = Result.scalar(result)
-
-    await session.delete(result)
+    await session.delete(object)
     await session.commit()
