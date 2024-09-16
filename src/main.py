@@ -22,9 +22,6 @@ app = FastAPI()
 app.include_router(file_router)
 
 
-app.mount("/media", StaticFiles(directory=settings.static.media_dir), name="media")
-
-
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",

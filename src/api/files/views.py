@@ -28,6 +28,13 @@ async def get_file(
     return await services.get_file(file_id=file_id, session=session)
 
 
+@router.get("/download/{file_id}")
+async def download_file(
+    file_id: int, session: AsyncSession = Depends(db_helper.session_getter)
+):
+    return await services.download_file(file_id=file_id, session=session)
+
+
 @router.post("/upload-file", response_model=FileResponse)
 async def upload_file(
     file: UploadFile = File(...),
