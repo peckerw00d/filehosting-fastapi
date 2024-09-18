@@ -3,7 +3,7 @@ from typing import List
 
 from minio import Minio
 
-from fastapi import Depends, File, UploadFile
+from fastapi import File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse as FastApiFileResponse
 
 from sqlalchemy import Result, select
@@ -12,8 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.models import FileModel
 from core.schemas import FileCreate, FileResponse
 from core.config import settings
-
-from . import dependencies
 
 
 client = Minio(
@@ -153,6 +151,11 @@ async def download_file(file: FileResponse):
 
 async def delete_file(file_id: int, session: AsyncSession):
     object = await session.get(FileModel, file_id)
+    if not object:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"File {file_id} not found!",
+        )
 
     client.remove_object("main-bucket", object.filename)
 
