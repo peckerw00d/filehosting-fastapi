@@ -1,14 +1,19 @@
 from tempfile import NamedTemporaryFile
 from typing import List
-from fastapi import File, UploadFile
-from fastapi.responses import FileResponse as FastApiFileResponse
+
 from minio import Minio
+
+from fastapi import Depends, File, UploadFile
+from fastapi.responses import FileResponse as FastApiFileResponse
+
 from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models import FileModel
 from core.schemas import FileCreate, FileResponse
 from core.config import settings
+
+from . import dependencies
 
 
 client = Minio(
@@ -128,9 +133,8 @@ async def upload_multiple_files(
     return res
 
 
-async def download_file(file_id: int, session: AsyncSession):
-    object = await session.get(FileModel, file_id)
-    object_name = object.filename
+async def download_file(file: FileResponse):
+    object_name = file.filename
 
     s3_object = client.get_object("main-bucket", object_name)
     content = s3_object.read()
