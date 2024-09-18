@@ -3,9 +3,9 @@ from typing import List
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.models import FileModel, db_helper
+from core.models import db_helper
 from core.schemas import FileResponse
-from . import services
+from . import services, dependencies
 
 
 router = APIRouter(tags=["Files"])
@@ -23,9 +23,9 @@ async def get_files(session: AsyncSession = Depends(db_helper.session_getter)):
 
 @router.get("/{file_id}", response_model=FileResponse)
 async def get_file(
-    file_id: int, session: AsyncSession = Depends(db_helper.session_getter)
+    file: FileResponse = Depends(dependencies.file_by_id)
 ):
-    return await services.get_file(file_id=file_id, session=session)
+    return file
 
 
 @router.get("/download/{file_id}")

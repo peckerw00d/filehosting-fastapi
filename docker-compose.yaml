@@ -13,6 +13,7 @@ services:
       - custom
 
   minio:
+    container_name: "storage"
     image: minio/minio
     command: ["server", "/data"]
     ports:
