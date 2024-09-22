@@ -11,7 +11,18 @@ services:
       - "5433:5432"
     networks:
       - custom
-
+  test-db:
+    container_name: "test-db"
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: test-postgres
+      POSTGRES_PASSWORD: test-postgres
+      POSTGRES_DB: test-postgres
+    ports:
+      - "5434:5432"
+    networks:
+      - custom
   minio:
     container_name: "storage"
     image: minio/minio
