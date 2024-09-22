@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e285991c-3646-4e32-a2e6-1354c5d1a529" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/alembic.ini" beforeDir="false" afterPath="$PROJECT_DIR$/src/alembic.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/alembic/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/alembic/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/alembic/versions/993e6195f17b_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/alembic/versions/d4de04d2b759_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/alembic/versions/eef28d9de6d8_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/db_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/models/db_helper.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2pqMctJGfBC4fhciQqGj2De2hYD" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/inal/FastAPI_Projects/todo_list",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.stylelint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.stylelint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.black.configuration.BlackFormatterConfigurable",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-PY-241.15989.155" />
+        <option value="bundled-python-sdk-babbdf50b680-7c6932dee5e4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.15989.155" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e285991c-3646-4e32-a2e6-1354c5d1a529" name="Changes" comment="" />
+      <created>1733489237066</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1733489237066</updated>
+      <workItem from="1733489238922" duration="856000" />
+      <workItem from="1733490302880" duration="26000" />
+      <workItem from="1733490512680" duration="6000" />
+      <workItem from="1733492214789" duration="212000" />
+      <workItem from="1733492435351" duration="132000" />
+      <workItem from="1733492681802" duration="70000" />
+      <workItem from="1733492769591" duration="540000" />
+      <workItem from="1733493325674" duration="478000" />
+      <workItem from="1733493832748" duration="33000" />
+      <workItem from="1733493881751" duration="182000" />
+      <workItem from="1734602420315" duration="277000" />
+      <workItem from="1734706490456" duration="4021000" />
+      <workItem from="1734788004144" duration="3896000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/filemanager_fastapi$main.coverage" NAME="main Coverage Results" MODIFIED="1734791120259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+  </component>
+</project>
