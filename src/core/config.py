@@ -15,10 +15,6 @@ class MinIOConfig(BaseModel):
     secure: bool = False
 
 
-class StaticDirConfig(BaseModel):
-    media_dir: str = str(Path(__file__).resolve().parents[1] / "media")
-
-
 class RunConfig(BaseModel):
     host: str = "0.0.0.0"
     port: int = 8001
@@ -26,17 +22,20 @@ class RunConfig(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
-    url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
+    url: str = os.getenv("DB_URL")
     echo: bool = False
     echo_pool: bool = False
     pool_size: int = 50
     max_overflow: int = 10
 
+class TestDatabaseConfig(BaseModel):
+    url: str = os.getenv("TEST_DB_URL")
+
 
 class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     db: DatabaseConfig = DatabaseConfig()
-    static: StaticDirConfig = StaticDirConfig()
+    test_db: TestDatabaseConfig = TestDatabaseConfig()
     minio: MinIOConfig = MinIOConfig()
 
 
