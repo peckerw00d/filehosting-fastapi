@@ -17,7 +17,7 @@ class MinIOConfig(BaseModel):
 
 class RunConfig(BaseModel):
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8002
     reload: bool = True
 
 
