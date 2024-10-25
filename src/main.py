@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
-from fastapi.staticfiles import StaticFiles
 import uvicorn
+
 from fastapi import FastAPI
 
 from core.config import settings
 from core.models import db_helper
 
 from api import router as file_router
+from api import router as auth_router
 
 
 @asynccontextmanager
@@ -20,6 +21,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI()
 
 app.include_router(file_router)
+app.include_router(auth_router)
 
 
 if __name__ == "__main__":

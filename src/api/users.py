@@ -1,8 +1,7 @@
 from typing import Optional
 import uuid
 from fastapi import Depends, Request
-from fastapi_users import BaseUserManager, UUIDIDMixin
-import fastapi_users
+from fastapi_users import BaseUserManager, UUIDIDMixin, FastAPIUsers
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from fastapi_users.authentication import (
     AuthenticationBackend,
