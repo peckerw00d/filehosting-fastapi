@@ -58,6 +58,7 @@ async def upload_file(
     )
 
     stat = client.stat_object("main-bucket", file.filename)
+    
 
     file_metadata = FileModel(
         filename=stat.object_name,

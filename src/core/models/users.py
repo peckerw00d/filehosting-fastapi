@@ -11,4 +11,4 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String)
     user_name: Mapped[str] = mapped_column(String)
     email_address: Mapped[str] = mapped_column(String, unique=True)
-    hash_password: Mapped[str] = mapped_column(String)
+    password: Mapped[str] = mapped_column(String)
