@@ -1,10 +1,9 @@
 from contextlib import asynccontextmanager
-from fastapi.staticfiles import StaticFiles
 import uvicorn
 from fastapi import FastAPI
 
-from core.config import settings
-from core.models import db_helper
+from config import settings
+from adapters.orm import db_helper
 
 from api import router as file_router
 

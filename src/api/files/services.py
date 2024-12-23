@@ -9,9 +9,9 @@ from fastapi.responses import FileResponse as FastApiFileResponse
 from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.models import FileModel
+from adapters.orm.models import FileModel
 from core.schemas import FileCreate, FileResponse
-from core.config import settings
+from config import settings
 
 
 client = Minio(

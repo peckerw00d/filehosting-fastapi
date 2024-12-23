@@ -4,16 +4,36 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e285991c-3646-4e32-a2e6-1354c5d1a529" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/a617c929-f3f0-4141-9892-511a1c515ff6.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/a617c929-f3f0-4141-9892-511a1c515ff6.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/a617c929-f3f0-4141-9892-511a1c515ff6/storage_v2/_src_/database/postgres.edMnLQ/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/a617c929-f3f0-4141-9892-511a1c515ff6/storage_v2/_src_/database/postgres.edMnLQ/schema/public.abK9xQ.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/filemanager-fastapi.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/filemanager-fastapi.iml" afterDir="false" />
+    <list default="true" id="e285991c-3646-4e32-a2e6-1354c5d1a529" name="Changes" comment="created test db">
+      <change afterPath="$PROJECT_DIR$/src/adapters/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/adapters/orm/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/alembic/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/alembic/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/files/dependencies.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/files/dependencies.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/files/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/files/services.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/files/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/files/routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/adapters/orm/models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/adapters/orm/models/base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/db_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/adapters/orm/db_helper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/files.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/adapters/orm/models/files.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tests/migrations/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/migrations/env.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -27,28 +47,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;project-refactoring&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/inal/FastAPI_Projects/filemanager-fastapi&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.black.configuration.BlackFormatterConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "project-refactoring",
+    "last_opened_file_path": "/home/inal/FastAPI_Projects/filemanager-fastapi",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.stylelint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.stylelint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/adapters/orm" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -79,8 +105,17 @@
       <workItem from="1734706490456" duration="4021000" />
       <workItem from="1734788004144" duration="3896000" />
       <workItem from="1734899706312" duration="712000" />
-      <workItem from="1734956926383" duration="475000" />
+      <workItem from="1734956926383" duration="2256000" />
     </task>
+    <task id="LOCAL-00001" summary="created test db">
+      <option name="closed" value="true" />
+      <created>1734957619754</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1734957619754</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -97,8 +132,12 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="created test db" />
+    <option name="LAST_COMMIT_MESSAGE" value="created test db" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/filemanager_fastapi$hashing_password.coverage" NAME="hashing_password Coverage Results" MODIFIED="1734896888775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/utils" />
-    <SUITE FILE_PATH="coverage/filemanager_fastapi$main.coverage" NAME="main Coverage Results" MODIFIED="1734957049789" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/filemanager_fastapi$main.coverage" NAME="main Coverage Results" MODIFIED="1734958767082" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
 </project>

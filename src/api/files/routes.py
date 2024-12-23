@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.models import db_helper
+from adapters.orm import db_helper
 from core.schemas import FileResponse
 from . import services, dependencies
 
