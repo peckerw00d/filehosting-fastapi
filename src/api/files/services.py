@@ -22,23 +22,6 @@ client = Minio(
 )
 
 
-async def read_file(file: bytes = File(...)):
-    content = file.decode("utf-8")
-    lines = content.split("\n")
-    return {"data": lines}
-
-
-async def get_file(file_id: int, session: AsyncSession):
-    return await session.get(FileModel, file_id)
-
-
-async def get_files(session: AsyncSession):
-    stmt = select(FileModel).order_by(FileModel.id)
-    result: Result = await session.execute(stmt)
-    files = Result.scalars(result).all()
-    return list(files)
-
-
 async def upload_file(
     session: AsyncSession,
     file: UploadFile = File(...),

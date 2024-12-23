@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from adapters.orm import db_helper
+from adapters.repository import SqlAlchemyRepository
+from adapters.orm.models import FileModel
 from core.schemas import FileResponse
 from . import services, dependencies
 
@@ -11,14 +13,10 @@ from . import services, dependencies
 router = APIRouter(tags=["Files"])
 
 
-@router.post("/read-file")
-async def read_file(file: bytes = File(...)):
-    return await services.read_file(file=file)
-
-
 @router.get("/", response_model=List[FileResponse])
 async def get_files(session: AsyncSession = Depends(db_helper.session_getter)):
-    return await services.get_files(session=session)
+    repo = SqlAlchemyRepository(session=session)
+    return await repo.list(FileModel)
 
 
 @router.get("/{file_id}", response_model=FileResponse)
