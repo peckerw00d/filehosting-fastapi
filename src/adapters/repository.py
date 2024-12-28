@@ -24,11 +24,14 @@ class SqlAlchemyRepository(AbstractRepository):
         return entity
 
     async def get(self, entity, entity_id):
-        entity = await self.session.get(entity, entity_id)
-        return entity
+        return await self.session.get(entity=entity, ident=entity_id)
 
     async def list(self, entity):
         stmt = select(entity).order_by(entity.id)
         result: Result = await self.session.execute(stmt)
         entities = Result.scalars(result).all()
         return list(entities)
+
+    async def delete(self, entity):
+        await self.session.delete(entity)
+        await self.session.commit()
