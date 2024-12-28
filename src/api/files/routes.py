@@ -7,16 +7,17 @@ from adapters.orm import db_helper
 from adapters.repository import SqlAlchemyRepository
 from adapters.orm.models import FileModel
 from core.schemas import FileResponse
-from . import services, dependencies
-
+from . import dependencies
+from service_layer.services import file_serivce
+from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
 
 router = APIRouter(tags=["Files"])
 
 
 @router.get("/", response_model=List[FileResponse])
-async def get_files(session: AsyncSession = Depends(db_helper.session_getter)):
-    repo = SqlAlchemyRepository(session=session)
-    return await repo.list(FileModel)
+async def get_files(uow: AbstractUnitOfWork = Depends(get_uow)):
+    async with uow:
+        return await uow.repo.list(FileModel)
 
 
 @router.get("/{file_id}", response_model=FileResponse)
@@ -26,37 +27,26 @@ async def get_file(file: FileResponse = Depends(dependencies.file_by_id)):
 
 @router.get("/download/{file_id}")
 async def download_file(file: FileResponse = Depends(dependencies.file_by_id)):
-    return await services.download_file(file=file)
+    return await file_serivce.download_file(file=file)
 
 
 @router.post("/upload-file", response_model=FileResponse)
 async def upload_file(
     file: UploadFile = File(...),
-    session: AsyncSession = Depends(db_helper.session_getter),
+    uow: AbstractUnitOfWork = Depends(get_uow),
 ):
-    return await services.upload_file(
+    return await file_serivce.upload_file(
         file=file,
-        session=session,
-    )
-
-
-@router.post("/upload-multiple-files", response_model=List[FileResponse])
-async def upload_multiple_files(
-    files: List[UploadFile] = File(...),
-    session: AsyncSession = Depends(db_helper.session_getter),
-):
-    return await services.upload_multiple_files(
-        files=files,
-        session=session,
+        uow=uow,
     )
 
 
 @router.delete("/{file_id}")
 async def delete_file(
     file_id: int,
-    session: AsyncSession = Depends(db_helper.session_getter),
+    uow: AbstractUnitOfWork = Depends(get_uow),
 ):
-    return await services.delete_file(
+    return await file_serivce.delete_file(
         file_id=file_id,
-        session=session,
+        uow=uow,
     )

@@ -4,8 +4,8 @@ from fastapi import FastAPI
 
 from config import settings
 from adapters.orm import db_helper
-
 from api import router as file_router
+from service_layer.unit_of_work import DEFAULT_ASYNC_ENGINE
 
 
 @asynccontextmanager
@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     yield
 
     print("dispose database")
-    await db_helper.dispose()
+    await DEFAULT_ASYNC_ENGINE.dispose()
 
 
 app = FastAPI()

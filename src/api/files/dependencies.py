@@ -3,20 +3,23 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.files import services
 from adapters.orm import db_helper
 from adapters.orm.models import FileModel
 from adapters.repository import SqlAlchemyRepository
 
+from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
+
+from core.schemas import FileResponse
+
 
 async def file_by_id(
     file_id: Annotated[int, Path],
-    session: AsyncSession = Depends(db_helper.session_getter),
+    uow: AbstractUnitOfWork = Depends(get_uow),
 ) -> FileModel:
-    repo = SqlAlchemyRepository(session=session)
-    file = await repo.get(entity=FileModel, entity_id=file_id)
-    if file is not None:
-        return file
+    async with uow:
+        file = await uow.repo.get(entity=FileModel, entity_id=file_id)
+        if file is not None:
+            return file
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
