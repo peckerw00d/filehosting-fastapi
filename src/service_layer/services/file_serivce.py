@@ -1,17 +1,13 @@
 from tempfile import NamedTemporaryFile
-from typing import List, Annotated
+from typing import Annotated
 
 from minio import Minio
 
 from fastapi import File, HTTPException, UploadFile, status, Depends, Path
 from fastapi.responses import FileResponse as FastApiFileResponse
 
-from sqlalchemy import Result, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from adapters.orm.models import FileModel
-from adapters.repository import AbstractRepository
-from core.schemas import FileCreate, FileResponse
+from api.schemas import FileResponse
 from config import settings
 from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
 

@@ -4,11 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e285991c-3646-4e32-a2e6-1354c5d1a529" name="Changes" comment="injected new patterns in endpoints">
+    <list default="true" id="e285991c-3646-4e32-a2e6-1354c5d1a529" name="Changes" comment="moved pydantic schemas to api">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/files/dependencies.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/files/dependencies.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/files/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/files/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/service_layer/services/file_serivce.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/service_layer/services/file_serivce.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/files/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/files/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/file_routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/case_convereter.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,6 +62,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/api" />
       <recent name="$PROJECT_DIR$/src/service_layer/services" />
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/src/adapters/orm" />
@@ -105,7 +108,7 @@
       <workItem from="1735304765079" duration="1912000" />
       <workItem from="1735384444763" duration="2359000" />
       <workItem from="1735401622926" duration="5954000" />
-      <workItem from="1735413995182" duration="458000" />
+      <workItem from="1735413995182" duration="2338000" />
     </task>
     <task id="LOCAL-00001" summary="created test db">
       <option name="closed" value="true" />
@@ -163,7 +166,39 @@
       <option name="project" value="LOCAL" />
       <updated>1735408239652</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="moved file_by_id dependency in service layer">
+      <option name="closed" value="true" />
+      <created>1735414473065</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1735414473065</updated>
+    </task>
+    <task id="LOCAL-00009" summary="moved file_by_id dependency in service layer">
+      <option name="closed" value="true" />
+      <created>1735414527458</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1735414527458</updated>
+    </task>
+    <task id="LOCAL-00010" summary="moved file_by_id dependency to service layer">
+      <option name="closed" value="true" />
+      <created>1735415483364</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1735415483364</updated>
+    </task>
+    <task id="LOCAL-00011" summary="moved pydantic schemas to api">
+      <option name="closed" value="true" />
+      <created>1735415564746</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1735415564746</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -188,7 +223,10 @@
     <MESSAGE value="init sessions in service layer" />
     <MESSAGE value="added delete method in repository" />
     <MESSAGE value="injected new patterns in endpoints" />
-    <option name="LAST_COMMIT_MESSAGE" value="injected new patterns in endpoints" />
+    <MESSAGE value="moved file_by_id dependency in service layer" />
+    <MESSAGE value="moved file_by_id dependency to service layer" />
+    <MESSAGE value="moved pydantic schemas to api" />
+    <option name="LAST_COMMIT_MESSAGE" value="moved pydantic schemas to api" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/filemanager_fastapi$hashing_password.coverage" NAME="hashing_password Coverage Results" MODIFIED="1734896888775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/utils" />

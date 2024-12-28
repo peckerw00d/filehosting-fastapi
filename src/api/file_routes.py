@@ -1,15 +1,12 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, File, UploadFile
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from adapters.orm import db_helper
-from adapters.repository import SqlAlchemyRepository
 from adapters.orm.models import FileModel
-from core.schemas import FileResponse
-from . import dependencies
+from api.schemas import FileResponse
 from service_layer.services import file_serivce
 from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
+
 
 router = APIRouter(tags=["Files"])
 
