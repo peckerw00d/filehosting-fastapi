@@ -21,12 +21,12 @@ async def get_files(uow: AbstractUnitOfWork = Depends(get_uow)):
 
 
 @router.get("/{file_id}", response_model=FileResponse)
-async def get_file(file: FileResponse = Depends(dependencies.file_by_id)):
+async def get_file(file: FileResponse = Depends(file_serivce.file_by_id)):
     return file
 
 
 @router.get("/download/{file_id}")
-async def download_file(file: FileResponse = Depends(dependencies.file_by_id)):
+async def download_file(file: FileResponse = Depends(file_serivce.file_by_id)):
     return await file_serivce.download_file(file=file)
 
 

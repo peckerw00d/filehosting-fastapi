@@ -1,9 +1,9 @@
 from tempfile import NamedTemporaryFile
-from typing import List
+from typing import List, Annotated
 
 from minio import Minio
 
-from fastapi import File, HTTPException, UploadFile, status
+from fastapi import File, HTTPException, UploadFile, status, Depends, Path
 from fastapi.responses import FileResponse as FastApiFileResponse
 
 from sqlalchemy import Result, select
@@ -13,7 +13,7 @@ from adapters.orm.models import FileModel
 from adapters.repository import AbstractRepository
 from core.schemas import FileCreate, FileResponse
 from config import settings
-from service_layer.unit_of_work import AbstractUnitOfWork
+from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
 
 
 client = Minio(
@@ -22,6 +22,21 @@ client = Minio(
     secret_key=settings.minio.secret_key,
     secure=settings.minio.secure,
 )
+
+
+async def file_by_id(
+    file_id: Annotated[int, Path],
+    uow: AbstractUnitOfWork = Depends(get_uow),
+) -> FileModel:
+    async with uow:
+        file = await uow.repo.get(entity=FileModel, entity_id=file_id)
+        if file is not None:
+            return file
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"File {file_id} not found!",
+    )
 
 
 def get_file_path(file: UploadFile) -> str:
