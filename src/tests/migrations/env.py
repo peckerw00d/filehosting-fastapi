@@ -15,7 +15,11 @@ fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
+<<<<<<< HEAD
 from core.models import Base
+=======
+from adapters.orm.models import Base
+>>>>>>> project-refactoring
 
 
 target_metadata = Base.metadata
