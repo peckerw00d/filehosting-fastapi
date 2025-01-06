@@ -1,7 +1,8 @@
+import os
 from tempfile import NamedTemporaryFile
 from typing import Annotated
 
-from minio import Minio
+from minio import Minio, S3Error
 
 from fastapi import File, HTTPException, UploadFile, status, Depends, Path
 from fastapi.responses import FileResponse as FastApiFileResponse
@@ -35,14 +36,11 @@ async def file_by_id(
     )
 
 
-def get_file_path(file: UploadFile) -> str:
-    temp = NamedTemporaryFile(delete=False)
-    content = file.file.read()
-
-    with temp as f:
-        f.write(content)
-
-    return temp.name
+def save_temp_file(file: UploadFile) -> str:
+    with NamedTemporaryFile(delete=False) as temp:
+        content = file.file.read()
+        temp.write(content)
+        return temp.name
 
 
 async def upload_file(
@@ -50,57 +48,79 @@ async def upload_file(
     file: UploadFile = File(...),
 ):
     file.filename = file.filename.lower()
+    file_path = save_temp_file(file)
 
-    file_path = get_file_path(file)
+    try:
+        client.fput_object(
+            "main-bucket",
+            file.filename,
+            file_path,
+        )
 
-    client.fput_object(
-        "main-bucket",
-        file.filename,
-        file_path,
-    )
+        stat = client.stat_object("main-bucket", file.filename)
 
-    stat = client.stat_object("main-bucket", file.filename)
+        file_metadata = FileModel(
+            filename=stat.object_name,
+            filesize=stat.size,
+            last_modified=stat.last_modified,
+            etag=stat.etag,
+            content_type=stat.content_type,
+        )
 
-    file_metadata = FileModel(
-        filename=stat.object_name,
-        filesize=stat.size,
-        last_modified=stat.last_modified,
-        etag=stat.etag,
-        content_type=stat.content_type,
-    )
+        async with uow:
+            await uow.repo.add(file_metadata)
 
-    async with uow:
-        await uow.repo.add(file_metadata)
+        return FileResponse.model_validate(file_metadata.__dict__)
 
-    return FileResponse.model_validate(file_metadata.__dict__)
+    except S3Error as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to upload file: {err}",
+        )
+
+    finally:
+        os.unlink(file_path)
 
 
 async def download_file(file: FileResponse):
     object_name = file.filename
 
-    s3_object = client.get_object("main-bucket", object_name)
-    content = s3_object.read()
+    try:
+        s3_object = client.get_object("main-bucket", object_name)
+        content = s3_object.read()
 
-    temp = NamedTemporaryFile(delete=False)
-    with temp as f:
-        f.write(content)
+        with NamedTemporaryFile(delete=False) as temp:
+            temp.write(content)
+            temp_path = temp.name
 
-    response = FastApiFileResponse(
-        path=temp.name, filename=object_name, media_type="application/octet-stream"
-    )
-    temp.close()
+        response = FastApiFileResponse(
+            path=temp_path, filename=object_name, media_type="application/octet-stream"
+        )
+        temp.close()
+        return response
 
-    return response
+    except S3Error as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to download file: {err}",
+        )
 
 
 async def delete_file(file_id: int, uow: AbstractUnitOfWork):
     async with uow:
-        object = await uow.repo.get(entity=FileModel, entity_id=file_id)
-        if not object:
+        file = await uow.repo.get(entity=FileModel, entity_id=file_id)
+        if not file:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"File {file_id} not found!",
             )
-        await uow.repo.delete(object)
+        try:
+            client.remove_object("main-bucket", file.filename)
+            await uow.repo.delete(file)
+            return {"message": f"File {file_id} deleted!"}
 
-    client.remove_object("main-bucket", object.filename)
+        except S3Error as err:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to delete file: {err}",
+            )

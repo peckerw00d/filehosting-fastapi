@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 
-from adapters.repository import AbstractRepository, SqlAlchemyRepository
-from adapters.orm import db_helper
-
 from fastapi import Depends
-
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
+
+from adapters.repository import AbstractRepository, SqlAlchemyRepository
 from config import settings
 
 

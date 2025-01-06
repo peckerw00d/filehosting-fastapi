@@ -7,12 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from alembic import context
 
-from core import settings
-<<<<<<< HEAD
-from core.models import Base
-=======
+from config import settings
 from adapters.orm.models import Base
->>>>>>> project-refactoring
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
