@@ -10,14 +10,14 @@ from config import settings
 class AbstractUnitOfWork(ABC):
     repo: AbstractRepository
 
-    def __aenter__(self):
+    async def __aenter__(self):
         return self
 
-    def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
-            self.commit()
+            await self.commit()
         else:
-            self.rollback()
+            await self.rollback()
 
     @abstractmethod
     async def commit(self):
@@ -51,10 +51,10 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     async def __aenter__(self):
         self.session = self.session_factory()
         self.repo = SqlAlchemyRepository(session=self.session)
-        return super().__aenter__()
+        return await super().__aenter__()
 
     async def __aexit__(self, *args):
-        super().__aexit__(*args)
+        await super().__aexit__(*args)
         await self.session.close()
 
     async def commit(self):
