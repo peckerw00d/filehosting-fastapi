@@ -8,7 +8,7 @@ from src.adapters.repository import SqlAlchemyRepository
 
 @pytest_asyncio.fixture()
 async def engine():
-    engine = create_async_engine(url=settings.test_db.url, echo=True)
+    engine = create_async_engine(url=settings.test_db.url, echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine
@@ -22,10 +22,7 @@ async def session(engine):
     async_session = async_sessionmaker(bind=engine, expire_on_commit=False)
     async with async_session() as session:
         async with session.begin():
-            try:
-                yield session
-            finally:
-                await session.close()
+            yield session
 
 
 @pytest_asyncio.fixture
