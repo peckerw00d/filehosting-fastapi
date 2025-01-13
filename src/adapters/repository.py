@@ -20,7 +20,6 @@ class SqlAlchemyRepository(AbstractRepository):
 
     async def add(self, entity):
         self.session.add(entity)
-        await self.session.commit()
         return entity
 
     async def get(self, entity, entity_id):
@@ -34,4 +33,3 @@ class SqlAlchemyRepository(AbstractRepository):
 
     async def delete(self, entity):
         await self.session.delete(entity)
-        await self.session.commit()
