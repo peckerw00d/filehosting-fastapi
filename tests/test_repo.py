@@ -9,33 +9,17 @@ from src.adapters.repository import SqlAlchemyRepository
 
 
 @pytest.mark.asyncio
-async def test_repo_add(session, repository):
-    file = FileModel(
-        filename="test_file.txt",
-        filesize=308,
-        content_type="application/octet-stream",
-        last_modified=datetime.now(),
-        etag="etag",
-    )
-
-    added_file = await repository.add(file)
+async def test_repo_add(session, repository, test_file):
+    added_file = await repository.add(test_file)
     await session.flush()
 
     assert added_file.id is not None
-    assert added_file.filename == "test_file.txt"
+    assert added_file.filename == test_file.filename
 
 
 @pytest.mark.asyncio
-async def test_repo_get_exist_entity(session, repository):
-    file = FileModel(
-        filename="test_file.txt",
-        filesize=308,
-        content_type="application/octet-stream",
-        last_modified=datetime.now(),
-        etag="etag",
-    )
-
-    added_file = await repository.add(file)
+async def test_repo_get_exist_entity(session, repository, test_file):
+    added_file = await repository.add(test_file)
     await session.flush()
 
     retrieved_file = await repository.get(FileModel, added_file.id)
@@ -46,56 +30,26 @@ async def test_repo_get_exist_entity(session, repository):
 
 
 @pytest.mark.asyncio
-async def test_repo_list(session, repository):
-    file_1 = FileModel(
-        filename="first_file.txt",
-        filesize=308,
-        content_type="application/octet-stream",
-        etag="etag",
-        last_modified=datetime.now(),
-    )
-    file_2 = FileModel(
-        filename="second_file.txt",
-        filesize=308,
-        content_type="application/octet-stream",
-        etag="etag",
-        last_modified=datetime.now(),
-    )
-    file_3 = FileModel(
-        filename="third_file.txt",
-        filesize=308,
-        content_type="application/octet-stream",
-        etag="etag",
-        last_modified=datetime.now(),
-    )
-
-    await repository.add(file_1)
-    await repository.add(file_2)
-    await repository.add(file_3)
+async def test_repo_list(session, repository, test_files_list):
+    await repository.add(test_files_list[0])
+    await repository.add(test_files_list[1])
+    await repository.add(test_files_list[2])
     session.flush()
 
     entities = await repository.list(FileModel)
 
     assert len(entities) == 3
-    assert entities[0].id == file_1.id
-    assert entities[1].id == file_2.id
-    assert entities[2].id == file_3.id
-    assert entities[0].filename == "first_file.txt"
-    assert entities[1].filename == "second_file.txt"
-    assert entities[2].filename == "third_file.txt"
+    assert entities[0].id == test_files_list[0].id
+    assert entities[1].id == test_files_list[1].id
+    assert entities[2].id == test_files_list[2].id
+    assert entities[0].filename == test_files_list[0].filename
+    assert entities[1].filename == test_files_list[1].filename
+    assert entities[2].filename == test_files_list[2].filename
 
 
 @pytest.mark.asyncio
-async def test_repo_delete(session, repository):
-    file = FileModel(
-        filename="test_file.txt",
-        filesize=308,
-        content_type="application/octet-stream",
-        last_modified=datetime.now(),
-        etag="etag",
-    )
-
-    added_file = await repository.add(file)
+async def test_repo_delete(session, repository, test_file):
+    added_file = await repository.add(test_file)
     await session.flush()
 
     retrieved_file = await repository.get(FileModel, added_file.id)

@@ -57,3 +57,34 @@ async def test_file():
         etag="etag",
     )
     return test_file
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_files_list():
+    test_files = [
+        FileModel(
+            id=1,
+            filename="test_file_1.txt",
+            filesize=308,
+            content_type="application/octet-stream",
+            last_modified=datetime.now(),
+            etag="etag",
+        ),
+        FileModel(
+            id=2,
+            filename="test_file_2.txt",
+            filesize=308,
+            content_type="application/octet-stream",
+            last_modified=datetime.now(),
+            etag="etag",
+        ),
+        FileModel(
+            id=3,
+            filename="test_file_3.txt",
+            filesize=308,
+            content_type="application/octet-stream",
+            last_modified=datetime.now(),
+            etag="etag",
+        ),
+    ]
+    return test_files
