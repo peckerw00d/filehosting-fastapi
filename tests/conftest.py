@@ -14,6 +14,7 @@ from minio import Minio
 from src.config import settings
 from src.adapters.orm.models import Base, FileModel
 from src.adapters.repository import SqlAlchemyRepository
+from src.adapters.storage_client import StorageClient
 from src.service_layer.unit_of_work import SqlAlchemyUnitOfWork, get_uow
 from src.main import app
 
@@ -110,10 +111,14 @@ async def client(unit_of_work):
 
 
 @pytest_asyncio.fixture(scope="function")
-async def upload_file():
+async def file_path():
     current_path = pathlib.Path(__file__).parent.absolute()
     file_path = current_path / "test_file.txt"
+    return file_path
 
+
+@pytest_asyncio.fixture(scope="function")
+async def upload_file(file_path):
     file = open(file_path, "rb")
     file_name = file_path.name
 
@@ -125,3 +130,11 @@ async def upload_file():
 
     file.close()
     upload_file.file.close()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def storage_client():
+    storage_client = StorageClient()
+    yield storage_client
+    obj_list = storage_client.client.list_objects("test-bucket")
+    storage_client.client.remove_objects("test-bucket", obj_list)
