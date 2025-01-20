@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, File, UploadFile
 
 from adapters.orm.models import FileModel
+from adapters.storage_client import get_storage_client, StorageClient
 from api.schemas import FileResponse
 from service_layer.services import file_serivce
 from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
@@ -23,18 +24,23 @@ async def get_file(file: FileResponse = Depends(file_serivce.file_by_id)):
 
 
 @router.get("/download/{file_id}")
-async def download_file(file: FileResponse = Depends(file_serivce.file_by_id)):
-    return await file_serivce.download_file(file=file)
+async def download_file(
+    file: FileResponse = Depends(file_serivce.file_by_id),
+    client: StorageClient = Depends(get_storage_client),
+):
+    return await file_serivce.download_file(file=file, client=client)
 
 
 @router.post("/upload-file", response_model=FileResponse)
 async def upload_file(
     file: UploadFile = File(...),
     uow: AbstractUnitOfWork = Depends(get_uow),
+    client: StorageClient = Depends(get_storage_client),
 ):
     return await file_serivce.upload_file(
         file=file,
         uow=uow,
+        client=client,
     )
 
 
@@ -42,8 +48,10 @@ async def upload_file(
 async def delete_file(
     file_id: int,
     uow: AbstractUnitOfWork = Depends(get_uow),
+    client: StorageClient = Depends(get_storage_client),
 ):
     return await file_serivce.delete_file(
         file_id=file_id,
         uow=uow,
+        client=client,
     )

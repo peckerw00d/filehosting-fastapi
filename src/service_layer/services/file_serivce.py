@@ -8,17 +8,11 @@ from fastapi import File, HTTPException, UploadFile, status, Depends, Path
 from fastapi.responses import FileResponse as FastApiFileResponse
 
 from adapters.orm.models import FileModel
+from adapters.storage_client import StorageClient
+
 from api.schemas import FileResponse
 from config import settings
 from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
-
-
-client = Minio(
-    endpoint=settings.minio.endpoint,
-    access_key=settings.minio.access_key,
-    secret_key=settings.minio.secret_key,
-    secure=settings.minio.secure,
-)
 
 
 async def file_by_id(
@@ -45,19 +39,16 @@ def save_temp_file(file: UploadFile) -> str:
 
 async def upload_file(
     uow: AbstractUnitOfWork,
+    client: StorageClient,
     file: UploadFile = File(...),
 ):
     file.filename = file.filename.lower()
     file_path = save_temp_file(file)
 
     try:
-        client.fput_object(
-            settings.minio.bucket,
-            file.filename,
-            file_path,
-        )
+        await client.upload_file(settings.minio.bucket, file.filename, file_path)
 
-        stat = client.stat_object("main-bucket", file.filename)
+        stat = await client.get_file_metadata(settings.minio.bucket, file.filename)
 
         file_metadata = FileModel(
             filename=stat.object_name,
@@ -82,11 +73,11 @@ async def upload_file(
         os.unlink(file_path)
 
 
-async def download_file(file: FileResponse):
+async def download_file(file: FileResponse, client: StorageClient):
     object_name = file.filename
 
     try:
-        s3_object = client.get_object(settings.minio.bucket, object_name)
+        s3_object = await client.download_file(settings.minio.bucket, object_name)
         content = s3_object.read()
 
         with NamedTemporaryFile(delete=False) as temp:
@@ -106,7 +97,7 @@ async def download_file(file: FileResponse):
         )
 
 
-async def delete_file(file_id: int, uow: AbstractUnitOfWork):
+async def delete_file(file_id: int, uow: AbstractUnitOfWork, client: StorageClient):
     async with uow:
         file = await uow.repo.get(entity=FileModel, entity_id=file_id)
         if not file:
@@ -115,7 +106,7 @@ async def delete_file(file_id: int, uow: AbstractUnitOfWork):
                 detail=f"File {file_id} not found!",
             )
         try:
-            client.remove_object(settings.minio.bucket, file.filename)
+            await client.delete_file(settings.minio.bucket, file.filename)
             await uow.repo.delete(file)
             return {"message": f"File {file_id} deleted!"}
 
