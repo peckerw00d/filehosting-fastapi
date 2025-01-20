@@ -1,13 +1,21 @@
 import pytest_asyncio
+import pathlib
 
 from datetime import datetime
+from httpx import AsyncClient, ASGITransport
+from io import BytesIO
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+
+from fastapi import UploadFile
+
+from minio import Minio
 
 from src.config import settings
 from src.adapters.orm.models import Base, FileModel
 from src.adapters.repository import SqlAlchemyRepository
-from src.service_layer.unit_of_work import SqlAlchemyUnitOfWork
+from src.service_layer.unit_of_work import SqlAlchemyUnitOfWork, get_uow
+from src.main import app
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -88,3 +96,32 @@ async def test_files_list():
         ),
     ]
     return test_files
+
+
+@pytest_asyncio.fixture(scope="function")
+async def client(unit_of_work):
+    app.dependency_overrides[get_uow] = unit_of_work
+    client = AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://127.0.0.1:8000/files"
+    )
+    yield client
+    await client.aclose()
+    app.dependency_overrides = {}
+
+
+@pytest_asyncio.fixture(scope="function")
+async def upload_file():
+    current_path = pathlib.Path(__file__).parent.absolute()
+    file_path = current_path / "test_file.txt"
+
+    file = open(file_path, "rb")
+    file_name = file_path.name
+
+    upload_file = UploadFile(filename=file_name, file=file)
+
+    files = {"file": (file_name, upload_file.file, "text/plain")}
+
+    yield files
+
+    file.close()
+    upload_file.file.close()

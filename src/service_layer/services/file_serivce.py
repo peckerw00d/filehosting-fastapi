@@ -52,7 +52,7 @@ async def upload_file(
 
     try:
         client.fput_object(
-            "main-bucket",
+            settings.minio.bucket,
             file.filename,
             file_path,
         )
@@ -86,7 +86,7 @@ async def download_file(file: FileResponse):
     object_name = file.filename
 
     try:
-        s3_object = client.get_object("main-bucket", object_name)
+        s3_object = client.get_object(settings.minio.bucket, object_name)
         content = s3_object.read()
 
         with NamedTemporaryFile(delete=False) as temp:
@@ -115,7 +115,7 @@ async def delete_file(file_id: int, uow: AbstractUnitOfWork):
                 detail=f"File {file_id} not found!",
             )
         try:
-            client.remove_object("main-bucket", file.filename)
+            client.remove_object(settings.minio.bucket, file.filename)
             await uow.repo.delete(file)
             return {"message": f"File {file_id} deleted!"}
 

@@ -13,6 +13,7 @@ class MinIOConfig(BaseModel):
     access_key: str = os.getenv("MINIO_ACCESS_KEY")
     secret_key: str = os.getenv("MINIO_SECRET_KEY")
     secure: bool = False
+    bucket: str = "main-bucket"
 
 
 class RunConfig(BaseModel):
