@@ -14,7 +14,7 @@ async def test_repo_add(session, repository, test_file):
     await session.flush()
 
     assert added_file.id is not None
-    assert added_file.filename == test_file.filename
+    assert added_file.file_url == test_file.file_url
 
 
 @pytest.mark.asyncio
@@ -26,7 +26,7 @@ async def test_repo_get_exist_entity(session, repository, test_file):
 
     assert retrieved_file.id is not None
     assert retrieved_file.id == added_file.id
-    assert retrieved_file.filename == "test_file.txt"
+    assert retrieved_file.file_url == added_file.file_url
 
 
 @pytest.mark.asyncio
@@ -42,9 +42,9 @@ async def test_repo_list(session, repository, test_files_list):
     assert entities[0].id == test_files_list[0].id
     assert entities[1].id == test_files_list[1].id
     assert entities[2].id == test_files_list[2].id
-    assert entities[0].filename == test_files_list[0].filename
-    assert entities[1].filename == test_files_list[1].filename
-    assert entities[2].filename == test_files_list[2].filename
+    assert entities[0].file_url == test_files_list[0].file_url
+    assert entities[1].file_url == test_files_list[1].file_url
+    assert entities[2].file_url == test_files_list[2].file_url
 
 
 @pytest.mark.asyncio

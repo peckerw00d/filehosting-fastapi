@@ -1,16 +1,22 @@
 import pytest
+import uuid
 
 from minio import S3Error
+
+file_url = str(uuid.uuid4())
 
 
 @pytest.mark.asyncio
 async def test_upload_file(storage_client, file_path):
-    await storage_client.upload_file("test-bucket", "test_file.txt", file_path)
-    file_stat = await storage_client.get_file_metadata("test-bucket", "test_file.txt")
+    await storage_client.upload_file(
+        "test-bucket", file_url, file_path, "test_file.txt"
+    )
+    file_stat = await storage_client.get_file_metadata("test-bucket", file_url)
 
     assert file_stat is not None
-    assert file_stat.object_name == "test_file.txt"
-    assert file_stat.size > 0
+    assert file_stat["filename"] == "test_file.txt"
+    assert file_stat["file_url"] == file_url
+    assert file_stat["file_size"] > 0
 
 
 @pytest.mark.asyncio
@@ -27,7 +33,7 @@ async def test_download_file(storage_client, file_path):
 
 @pytest.mark.asyncio
 async def test_delete_file(storage_client, file_path):
-    await storage_client.upload_file("test-bucket", "test_file.txt", file_path)
+    storage_client.client.fput_object("test-bucket", "test_file.txt", file_path)
     file_stat = await storage_client.get_file_metadata("test-bucket", "test_file.txt")
 
     assert file_stat is not None

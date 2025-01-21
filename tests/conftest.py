@@ -57,44 +57,16 @@ async def unit_of_work(session_factory):
 
 @pytest_asyncio.fixture(scope="function")
 async def test_file():
-    test_file = FileModel(
-        id=1,
-        filename="test_file.txt",
-        filesize=308,
-        content_type="application/octet-stream",
-        last_modified=datetime.now(),
-        etag="etag",
-    )
+    test_file = FileModel(id=1)
     return test_file
 
 
 @pytest_asyncio.fixture(scope="function")
 async def test_files_list():
     test_files = [
-        FileModel(
-            id=1,
-            filename="test_file_1.txt",
-            filesize=308,
-            content_type="application/octet-stream",
-            last_modified=datetime.now(),
-            etag="etag",
-        ),
-        FileModel(
-            id=2,
-            filename="test_file_2.txt",
-            filesize=308,
-            content_type="application/octet-stream",
-            last_modified=datetime.now(),
-            etag="etag",
-        ),
-        FileModel(
-            id=3,
-            filename="test_file_3.txt",
-            filesize=308,
-            content_type="application/octet-stream",
-            last_modified=datetime.now(),
-            etag="etag",
-        ),
+        FileModel(id=1),
+        FileModel(id=2),
+        FileModel(id=3),
     ]
     return test_files
 
