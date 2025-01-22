@@ -39,10 +39,10 @@ class StorageClient(AbstractStorageClient):
             obj_stat = self.client.stat_object(bucket, file_url)
             return {
                 "filename": obj_stat.metadata.get("x-amz-meta-filename"),
-                "file_url": file_url,
                 "file_size": obj_stat.size,
-                "file_type": obj_stat.content_type,
                 "last_modified": obj_stat.last_modified,
+                "etag": obj_stat.etag,
+                "content_type": obj_stat.content_type,
             }
 
         except S3Error as e:

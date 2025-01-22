@@ -15,7 +15,6 @@ async def test_upload_file(storage_client, file_path):
 
     assert file_stat is not None
     assert file_stat["filename"] == "test_file.txt"
-    assert file_stat["file_url"] == file_url
     assert file_stat["file_size"] > 0
 
 

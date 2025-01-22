@@ -1,33 +1,61 @@
 import os
+import uuid
 from tempfile import NamedTemporaryFile
 from typing import Annotated
 
 from minio import Minio, S3Error
 
-from fastapi import File, HTTPException, UploadFile, status, Depends, Path
+from fastapi import HTTPException, UploadFile, status, Depends, Path
 from fastapi.responses import FileResponse as FastApiFileResponse
 
 from adapters.orm.models import FileModel
-from adapters.storage_client import StorageClient
+from adapters.storage_client import AbstractStorageClient
 
-from api.schemas import FileResponse
+from api.schemas import FileResponse, FileCreate
 from config import settings
 from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
 
 
-async def file_by_id(
+class FileNotFound(Exception):
+    pass
+
+
+class FileUploadError(Exception):
+    pass
+
+
+class FileDeletingError(Exception):
+    pass
+
+
+async def get_files(uow: AbstractUnitOfWork, client: AbstractStorageClient):
+    file_list = []
+    async with uow:
+        file_urls = await uow.repo.list(FileModel)
+        for file in file_urls:
+            file_list.append(
+                FileResponse.model_validate(
+                    await client.get_file_metadata(settings.minio.bucket, file.file_url)
+                )
+            )
+    return file_list
+
+
+async def get_file(
     file_id: Annotated[int, Path],
+    client: AbstractStorageClient,
     uow: AbstractUnitOfWork = Depends(get_uow),
-) -> FileModel:
+) -> FileResponse:
     async with uow:
         file = await uow.repo.get(entity=FileModel, entity_id=file_id)
         if file is not None:
-            return file
+            file_metadata = await client.get_file_metadata(
+                settings.minio.bucket,
+                file.file_url,
+            )
+            return FileResponse.model_validate(file_metadata)
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"File {file_id} not found!",
-    )
+        raise Exception
 
 
 def save_temp_file(file: UploadFile) -> str:
@@ -39,79 +67,66 @@ def save_temp_file(file: UploadFile) -> str:
 
 async def upload_file(
     uow: AbstractUnitOfWork,
-    client: StorageClient,
-    file: UploadFile = File(...),
+    client: AbstractStorageClient,
+    file: UploadFile,
 ):
     file.filename = file.filename.lower()
     file_path = save_temp_file(file)
 
     try:
-        await client.upload_file(settings.minio.bucket, file.filename, file_path)
+        file_metadata = FileModel(file_url=str(uuid.uuid4()))
 
-        stat = await client.get_file_metadata(settings.minio.bucket, file.filename)
-
-        file_metadata = FileModel(
-            filename=stat.object_name,
-            filesize=stat.size,
-            last_modified=stat.last_modified,
-            etag=stat.etag,
-            content_type=stat.content_type,
+        await client.upload_file(
+            settings.minio.bucket,
+            file_metadata.file_url,
+            file_path,
+            file.filename,
+        )
+        stat = await client.get_file_metadata(
+            settings.minio.bucket, file_metadata.file_url
         )
 
         async with uow:
             await uow.repo.add(file_metadata)
 
-        return FileResponse.model_validate(file_metadata.__dict__)
+        return FileCreate.model_validate(stat)
 
     except S3Error as err:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to upload file: {err}",
-        )
+        raise FileUploadError(f"Failed to upload file: {err}")
 
     finally:
         os.unlink(file_path)
 
 
-async def download_file(file: FileResponse, client: StorageClient):
-    object_name = file.filename
+async def download_file(file_url: str, client: AbstractStorageClient):
+    s3_object = await client.download_file(settings.minio.bucket, file_url)
+    content = s3_object.read()
 
-    try:
-        s3_object = await client.download_file(settings.minio.bucket, object_name)
-        content = s3_object.read()
+    with NamedTemporaryFile(delete=False) as temp:
+        temp.write(content)
+        temp_path = temp.name
 
-        with NamedTemporaryFile(delete=False) as temp:
-            temp.write(content)
-            temp_path = temp.name
-
-        response = FastApiFileResponse(
-            path=temp_path, filename=object_name, media_type="application/octet-stream"
-        )
-        temp.close()
-        return response
-
-    except S3Error as err:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to download file: {err}",
-        )
+    file_metadata = await client.get_file_metadata(settings.minio.bucket, file_url)
+    response = FastApiFileResponse(
+        path=temp_path,
+        filename=file_metadata["filename"],
+        media_type="application/octet-stream",
+    )
+    temp.close()
+    return response
 
 
-async def delete_file(file_id: int, uow: AbstractUnitOfWork, client: StorageClient):
+async def delete_file(
+    file_id: int, uow: AbstractUnitOfWork, client: AbstractStorageClient
+):
     async with uow:
         file = await uow.repo.get(entity=FileModel, entity_id=file_id)
         if not file:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"File {file_id} not found!",
-            )
+            raise FileNotFound()
         try:
-            await client.delete_file(settings.minio.bucket, file.filename)
+            await client.delete_file(settings.minio.bucket, file.file_url)
             await uow.repo.delete(file)
             return {"message": f"File {file_id} deleted!"}
 
         except S3Error as err:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to delete file: {err}",
-            )
+            raise FileDeletingError(err)

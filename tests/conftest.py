@@ -105,6 +105,18 @@ async def upload_file(file_path):
 
 
 @pytest_asyncio.fixture(scope="function")
+async def upload_file_for_services(file_path):
+    with open(file_path, "rb") as f:
+        content = f.read()
+
+    upload_file = UploadFile(filename=file_path.name, file=BytesIO(content))
+
+    yield upload_file
+
+    upload_file.file.close()
+
+
+@pytest_asyncio.fixture(scope="function")
 async def storage_client():
     storage_client = StorageClient()
     yield storage_client
