@@ -13,7 +13,7 @@ from adapters.storage_client import (
 from api.schemas import FileResponse, FileCreate
 from service_layer.services import file_serivce
 from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
-
+from config import get_minio_settings, Settings
 
 router = APIRouter(tags=["Files"])
 
@@ -22,8 +22,11 @@ router = APIRouter(tags=["Files"])
 async def get_files(
     uow: AbstractUnitOfWork = Depends(get_uow),
     client: AbstractStorageClient = Depends(get_storage_client),
+    minio_settings: Settings = Depends(get_minio_settings),
 ):
-    return await file_serivce.get_files(uow=uow, client=client)
+    return await file_serivce.get_files(
+        uow=uow, client=client, minio_settings=minio_settings
+    )
 
 
 @router.get("/{file_id}", response_model=FileResponse)
@@ -31,9 +34,12 @@ async def get_file(
     file_id: int,
     uow: AbstractUnitOfWork = Depends(get_uow),
     client: AbstractStorageClient = Depends(get_storage_client),
+    minio_settings: Settings = Depends(get_minio_settings),
 ):
     try:
-        return await file_serivce.get_file(file_id=file_id, client=client, uow=uow)
+        return await file_serivce.get_file(
+            file_id=file_id, client=client, uow=uow, minio_settings=minio_settings
+        )
 
     except Exception as e:
         raise HTTPException(
@@ -46,9 +52,12 @@ async def get_file(
 async def download_file(
     file_url: str,
     client: AbstractStorageClient = Depends(get_storage_client),
+    minio_settings: Settings = Depends(get_minio_settings),
 ):
     try:
-        return await file_serivce.download_file(file_url=file_url, client=client)
+        return await file_serivce.download_file(
+            file_url=file_url, client=client, minio_settings=minio_settings
+        )
 
     except S3Error as err:
         raise HTTPException(
@@ -62,12 +71,14 @@ async def upload_file(
     file: UploadFile = File(...),
     uow: AbstractUnitOfWork = Depends(get_uow),
     client: AbstractStorageClient = Depends(get_storage_client),
+    minio_settings: Settings = Depends(get_minio_settings),
 ):
     try:
         return await file_serivce.upload_file(
             file=file,
             uow=uow,
             client=client,
+            minio_settings=minio_settings,
         )
     except file_serivce.FileUploadError as err:
         raise HTTPException(
@@ -86,12 +97,14 @@ async def delete_file(
     file_id: int,
     uow: AbstractUnitOfWork = Depends(get_uow),
     client: StorageClient = Depends(get_storage_client),
+    minio_settings: Settings = Depends(get_minio_settings),
 ):
     try:
         return await file_serivce.delete_file(
             file_id=file_id,
             uow=uow,
             client=client,
+            minio_settings=minio_settings,
         )
     except file_serivce.FileDeletingError:
         raise HTTPException(

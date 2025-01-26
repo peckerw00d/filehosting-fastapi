@@ -11,7 +11,7 @@ from fastapi import UploadFile
 
 from minio import Minio
 
-from src.config import settings
+from src.config import settings, Settings, get_minio_settings, MinIOConfig
 from src.adapters.orm.models import Base, FileModel
 from src.adapters.repository import SqlAlchemyRepository
 from src.adapters.storage_client import StorageClient
@@ -102,23 +102,3 @@ async def upload_file(file_path):
 
     file.close()
     upload_file.file.close()
-
-
-@pytest_asyncio.fixture(scope="function")
-async def upload_file_for_services(file_path):
-    with open(file_path, "rb") as f:
-        content = f.read()
-
-    upload_file = UploadFile(filename=file_path.name, file=BytesIO(content))
-
-    yield upload_file
-
-    upload_file.file.close()
-
-
-@pytest_asyncio.fixture(scope="function")
-async def storage_client():
-    storage_client = StorageClient()
-    yield storage_client
-    obj_list = storage_client.client.list_objects("test-bucket")
-    storage_client.client.remove_objects("test-bucket", obj_list)

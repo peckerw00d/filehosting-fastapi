@@ -39,6 +39,7 @@ class StorageClient(AbstractStorageClient):
             obj_stat = self.client.stat_object(bucket, file_url)
             return {
                 "filename": obj_stat.metadata.get("x-amz-meta-filename"),
+                "file_url": file_url,
                 "file_size": obj_stat.size,
                 "last_modified": obj_stat.last_modified,
                 "etag": obj_stat.etag,

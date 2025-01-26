@@ -42,3 +42,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+async def get_minio_settings():
+    return settings.minio

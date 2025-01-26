@@ -12,7 +12,7 @@ from adapters.orm.models import FileModel
 from adapters.storage_client import AbstractStorageClient
 
 from api.schemas import FileResponse, FileCreate
-from config import settings
+from config import settings, get_minio_settings, Settings
 from service_layer.unit_of_work import AbstractUnitOfWork, get_uow
 
 
@@ -28,14 +28,16 @@ class FileDeletingError(Exception):
     pass
 
 
-async def get_files(uow: AbstractUnitOfWork, client: AbstractStorageClient):
+async def get_files(
+    uow: AbstractUnitOfWork, client: AbstractStorageClient, minio_settings: Settings
+):
     file_list = []
     async with uow:
         file_urls = await uow.repo.list(FileModel)
         for file in file_urls:
             file_list.append(
                 FileResponse.model_validate(
-                    await client.get_file_metadata(settings.minio.bucket, file.file_url)
+                    await client.get_file_metadata(minio_settings.bucket, file.file_url)
                 )
             )
     return file_list
@@ -44,13 +46,14 @@ async def get_files(uow: AbstractUnitOfWork, client: AbstractStorageClient):
 async def get_file(
     file_id: Annotated[int, Path],
     client: AbstractStorageClient,
-    uow: AbstractUnitOfWork = Depends(get_uow),
+    uow: AbstractUnitOfWork,
+    minio_settings: Settings,
 ) -> FileResponse:
     async with uow:
         file = await uow.repo.get(entity=FileModel, entity_id=file_id)
         if file is not None:
             file_metadata = await client.get_file_metadata(
-                settings.minio.bucket,
+                minio_settings.bucket,
                 file.file_url,
             )
             return FileResponse.model_validate(file_metadata)
@@ -69,6 +72,7 @@ async def upload_file(
     uow: AbstractUnitOfWork,
     client: AbstractStorageClient,
     file: UploadFile,
+    minio_settings: Settings,
 ):
     file.filename = file.filename.lower()
     file_path = save_temp_file(file)
@@ -83,7 +87,7 @@ async def upload_file(
             file.filename,
         )
         stat = await client.get_file_metadata(
-            settings.minio.bucket, file_metadata.file_url
+            minio_settings.bucket, file_metadata.file_url
         )
 
         async with uow:
@@ -98,7 +102,9 @@ async def upload_file(
         os.unlink(file_path)
 
 
-async def download_file(file_url: str, client: AbstractStorageClient):
+async def download_file(
+    file_url: str, client: AbstractStorageClient, minio_settings: Settings
+):
     s3_object = await client.download_file(settings.minio.bucket, file_url)
     content = s3_object.read()
 
@@ -106,7 +112,7 @@ async def download_file(file_url: str, client: AbstractStorageClient):
         temp.write(content)
         temp_path = temp.name
 
-    file_metadata = await client.get_file_metadata(settings.minio.bucket, file_url)
+    file_metadata = await client.get_file_metadata(minio_settings.bucket, file_url)
     response = FastApiFileResponse(
         path=temp_path,
         filename=file_metadata["filename"],
@@ -117,7 +123,10 @@ async def download_file(file_url: str, client: AbstractStorageClient):
 
 
 async def delete_file(
-    file_id: int, uow: AbstractUnitOfWork, client: AbstractStorageClient
+    file_id: int,
+    uow: AbstractUnitOfWork,
+    client: AbstractStorageClient,
+    minio_settings: Settings,
 ):
     async with uow:
         file = await uow.repo.get(entity=FileModel, entity_id=file_id)
