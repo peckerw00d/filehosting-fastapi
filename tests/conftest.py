@@ -102,3 +102,12 @@ async def upload_file(file_path):
 
     file.close()
     upload_file.file.close()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def storage_client():
+    storage_client = StorageClient()
+    obj_list = storage_client.client.list_objects("test-bucket")
+    objects = [obj.object_name for obj in obj_list]
+    storage_client.client.remove_objects("test-bucket", objects)
+    yield storage_client
