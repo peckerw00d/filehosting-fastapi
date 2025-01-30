@@ -19,6 +19,4 @@ class FileCreate(FileBase):
 
 class FileResponse(FileBase):
     class Config:
-        model_config = ConfigDict(
-            from_attributes=True,
-        )
+        model_config = ConfigDict(from_attributes=True)

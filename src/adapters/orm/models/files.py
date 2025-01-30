@@ -12,9 +12,9 @@ class FileModel(Base):
     __tablename__ = "files"
 
     file_url: Mapped[str] = mapped_column(
-        String,
-        nullable=False,
-        default=lambda: str(uuid4()),
+        String, nullable=False, default=lambda: str(uuid4())
     )
     storage: Mapped["UserStorage"] = relationship(back_populates="files", uselist=False)
-    storage_id: Mapped[UUID] = mapped_column(ForeignKey("user_storages.id"))
+    storage_id: Mapped[UUID] = mapped_column(
+        ForeignKey("user_storages.id"), nullable=True
+    )
