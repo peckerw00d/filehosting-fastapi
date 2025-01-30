@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from config import settings
-from api import router as file_router
+from api import router
 from service_layer.unit_of_work import DEFAULT_ASYNC_ENGINE
 
 
@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI()
 
-app.include_router(file_router)
+app.include_router(router)
 
 
 if __name__ == "__main__":
