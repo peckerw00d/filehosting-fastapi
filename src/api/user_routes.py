@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi.responses import RedirectResponse
 
 from minio import S3Error
 
@@ -20,9 +21,10 @@ async def register(
     storage_client: AbstractStorageClient = Depends(get_storage_client),
 ):
     try:
-        return await user_service.create_user(
+        await user_service.create_user(
             uow=uow, user_data=user_data, storage_client=storage_client
         )
+        return RedirectResponse("/files/", status_code=302)
 
     except S3Error as err:
         raise HTTPException(

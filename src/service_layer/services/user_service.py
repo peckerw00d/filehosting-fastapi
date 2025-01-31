@@ -38,7 +38,7 @@ async def create_user(
 
         await uow.repo.add(user_storage)
 
-    return UserResponse.model_validate(
+    UserResponse.model_validate(
         {
             "username": user.username,
             "email": user.email,
