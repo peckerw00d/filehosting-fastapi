@@ -3,7 +3,8 @@ __all__ = (
     "FileResponse",
     "UserCreate",
     "UserResponse",
+    "UserLogin",
 )
 
 from api.schemas.files import FileCreate, FileResponse
-from api.schemas.users import UserCreate, UserResponse
+from api.schemas.users import UserCreate, UserResponse, UserLogin

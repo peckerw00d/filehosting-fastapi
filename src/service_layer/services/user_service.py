@@ -1,13 +1,21 @@
-from src.service_layer.unit_of_work import AbstractUnitOfWork
+import uuid
 
-from src.adapters.orm.models import User, UserStorage
+from src.service_layer.unit_of_work import AbstractUnitOfWork, get_uow
+
+from src.adapters.orm.models import User, UserStorage, Session
 from src.adapters.storage_client import AbstractStorageClient, get_storage_client
 
-from api.schemas import UserCreate, UserResponse
+from api.schemas import UserCreate, UserResponse, UserLogin
 
-from src.utils import hash_password
+from src.utils import hash_password, verify_password
 
 from minio import S3Error
+
+from sqlalchemy import select
+
+
+class LoginError(Exception):
+    pass
 
 
 async def create_user(
@@ -44,3 +52,24 @@ async def create_user(
             "email": user.email,
         }
     )
+
+
+async def check_user_credentials(uow: AbstractUnitOfWork, user_data: UserLogin):
+    async with uow:
+        stmt = select(User).where(User.username == user_data.username)
+
+        result = await uow.session.execute(stmt)
+        user = result.scalars().first()
+
+    if verify_password(user.password_hash, user_data.password):
+        return user
+
+    raise LoginError()
+
+
+async def create_session(uow: AbstractUnitOfWork, user_id: uuid.UUID):
+    async with uow:
+        session = Session(user_fk=user_id)
+        await uow.repo.add(session)
+
+    return session
