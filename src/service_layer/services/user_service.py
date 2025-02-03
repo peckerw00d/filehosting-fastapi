@@ -54,14 +54,17 @@ async def create_user(
     )
 
 
-async def check_user_credentials(uow: AbstractUnitOfWork, user_data: UserLogin):
+async def check_user_credentials(uow: AbstractUnitOfWork, user_credentials: UserLogin):
     async with uow:
-        stmt = select(User).where(User.username == user_data.username)
+        stmt = select(User).where(User.username == user_credentials.username)
 
         result = await uow.session.execute(stmt)
         user = result.scalars().first()
 
-    if verify_password(user.password_hash, user_data.password):
+    if not user:
+        raise LoginError("User not found")
+
+    if verify_password(user.password_hash, user_credentials.password):
         return user
 
     raise LoginError()

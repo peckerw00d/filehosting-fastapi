@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 
+import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Result
+from sqlalchemy.orm import selectinload
 
 
 class AbstractRepository(ABC):
@@ -33,3 +36,12 @@ class SqlAlchemyRepository(AbstractRepository):
 
     async def delete(self, entity):
         await self.session.delete(entity)
+
+    async def get_session_by_id(self, entity, session_id):
+        stmt = stmt = (
+            select(entity)
+            .where(entity.session_id == uuid.UUID(session_id))
+            .options(selectinload(entity.user))
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().first()

@@ -1,17 +1,25 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
+from fastapi.security import HTTPBasic
 
+from sqlalchemy import select
+
+from typing import Annotated
 from minio import S3Error
 
 from src.service_layer.services import user_service
 from src.service_layer.unit_of_work import AbstractUnitOfWork, get_uow
 
+from src.adapters.orm.models import User, Session
 from src.adapters.storage_client import AbstractStorageClient, get_storage_client
 
 from api.schemas import UserCreate, UserLogin
+from api.dependencies import get_current_user
 
 
 router = APIRouter(tags=["Users"])
+
+security = HTTPBasic()
 
 
 @router.post("/register")
@@ -34,18 +42,40 @@ async def register(
 
 
 @router.post("/login")
-async def login(user_data: UserLogin, uow: AbstractUnitOfWork = Depends(get_uow)):
+async def login(
+    user_credentials: Annotated[UserLogin, Depends(security)],
+    uow: AbstractUnitOfWork = Depends(get_uow),
+):
     try:
-        user = await user_service.check_user_credentials(uow=uow, user_data=user_data)
+        user = await user_service.check_user_credentials(
+            uow=uow, user_credentials=user_credentials
+        )
 
     except user_service.LoginError as err:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err))
 
     session = await user_service.create_session(uow=uow, user_id=user.id)
 
     response = RedirectResponse("/files/", status_code=302)
-    response.set_cookie(
-        key="Authorization", value=str(session.session_id), httponly=True
-    )
+    response.set_cookie(key="session_id", value=str(session.session_id), httponly=True)
 
     return response
+
+
+@router.post("/logout")
+async def logout(
+    response: Response,
+    uow: AbstractUnitOfWork = Depends(get_uow),
+    current_user: User = Depends(get_current_user),
+):
+    async with uow:
+        result = await uow.session.execute(
+            select(Session).where(Session.user_fk == current_user.id)
+        )
+        session = result.scalars().first()
+
+        if session:
+            await uow.repo.delete(session)
+
+    response.delete_cookie(key="session_id")
+    return {"message": "Logged out successfully"}
