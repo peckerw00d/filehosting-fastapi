@@ -3,13 +3,16 @@ from abc import ABC, abstractmethod
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
 
-from adapters.repository import AbstractRepository, SqlAlchemyRepository
+from adapters.repository import (
+    AbstractRepository,
+    FileRepository,
+    UserRepository,
+    SessionRepository,
+)
 from config import settings
 
 
 class AbstractUnitOfWork(ABC):
-    repo: AbstractRepository
-
     async def __aenter__(self):
         return self
 
@@ -41,7 +44,7 @@ DEFAULT_ASYNC_SESSION_MAKER = async_sessionmaker(
 )
 
 
-class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
+class UnitOfWork(AbstractUnitOfWork):
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession] = DEFAULT_ASYNC_SESSION_MAKER,
@@ -50,7 +53,9 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     async def __aenter__(self):
         self.session = self.session_factory()
-        self.repo = SqlAlchemyRepository(session=self.session)
+        self.users = UserRepository(self.session)
+        self.files = FileRepository(self.session)
+        self.sessions = SessionRepository(self.session)
         return await super().__aenter__()
 
     async def __aexit__(self, *args):
@@ -65,4 +70,4 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
 
 async def get_uow() -> AbstractUnitOfWork:
-    return SqlAlchemyUnitOfWork()
+    return UnitOfWork()
