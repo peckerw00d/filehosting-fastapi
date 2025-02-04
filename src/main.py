@@ -1,9 +1,10 @@
 from contextlib import asynccontextmanager
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException, status
 
 from config import settings
 from api import router
+from api.middleware import session_middleware
 from service_layer.unit_of_work import DEFAULT_ASYNC_ENGINE
 
 
@@ -16,6 +17,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI()
+
+
+app.middleware("http")(session_middleware)
 
 app.include_router(router)
 

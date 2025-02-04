@@ -70,6 +70,14 @@ async def check_user_credentials(uow: AbstractUnitOfWork, user_credentials: User
     raise LoginError()
 
 
+async def check_session(uow: AbstractUnitOfWork, session: Session):
+    async with uow:
+        result = await uow.session.execute(
+            select(Session).where(Session.user_fk == current_user.id)
+        )
+        session = result.scalars().first()
+
+
 async def create_session(uow: AbstractUnitOfWork, user_id: uuid.UUID):
     async with uow:
         session = Session(user_fk=user_id)

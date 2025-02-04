@@ -6,22 +6,12 @@ from src.service_layer.unit_of_work import AbstractUnitOfWork, get_uow
 from src.adapters.orm.models import Session
 
 
-async def get_current_user(
-    request: Request, uow: AbstractUnitOfWork = Depends(get_uow)
-):
-    session_id = request.cookies.get("session_id")
-    if not session_id:
+async def get_current_user(request: Request):
+    user = getattr(request.state, "user", None)
+
+    if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Session not found"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
 
-    async with uow:
-        session = await uow.repo.get_session_by_id(Session, session_id)
-
-        if not session:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid session"
-            )
-
-        # Возвращаем пользователя внутри контекста
-        return session.user
+    return user
