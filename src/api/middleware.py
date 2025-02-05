@@ -1,16 +1,20 @@
+import uuid
+
 from fastapi import Request, Depends, HTTPException, status
+
+import uuid
 
 from src.service_layer.unit_of_work import (
     AbstractUnitOfWork,
     get_uow,
-    SqlAlchemyUnitOfWork,
+    UnitOfWork,
 )
 from src.adapters.orm.models import Session
 
 
-async def get_user_from_session(session_id: str, uow: AbstractUnitOfWork):
+async def get_user_from_session(session_id: uuid.UUID, uow: AbstractUnitOfWork):
     async with uow:
-        session = await uow.repo.get_session_by_id(Session, session_id)
+        session = await uow.sessions.get(session_id)
         if not session:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid session"
@@ -25,12 +29,12 @@ async def session_middleware(request: Request, call_next):
     session_id = request.cookies.get("session_id")
 
     if session_id:
-        uow = SqlAlchemyUnitOfWork()
+        uow = UnitOfWork()
         try:
-            user = await get_user_from_session(session_id, uow)
+            user = await get_user_from_session(uuid.UUID(session_id), uow)
             request.state.user = user
-        except HTTPException as e:
-            raise e
+        except HTTPException as err:
+            raise err
 
     response = await call_next(request)
     return response

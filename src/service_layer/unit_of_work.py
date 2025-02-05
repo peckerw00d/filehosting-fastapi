@@ -8,6 +8,7 @@ from adapters.repository import (
     FileRepository,
     UserRepository,
     SessionRepository,
+    StorageRepository,
 )
 from config import settings
 
@@ -56,6 +57,7 @@ class UnitOfWork(AbstractUnitOfWork):
         self.users = UserRepository(self.session)
         self.files = FileRepository(self.session)
         self.sessions = SessionRepository(self.session)
+        self.storages = StorageRepository(self.session)
         return await super().__aenter__()
 
     async def __aexit__(self, *args):

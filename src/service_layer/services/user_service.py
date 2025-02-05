@@ -32,7 +32,7 @@ async def create_user(
             password_hash=password_hash,
         )
 
-        await uow.repo.add(user)
+        await uow.users.add(user)
 
     try:
         storage_client.client.make_bucket(str(user.id))
@@ -44,7 +44,7 @@ async def create_user(
             user_fk=user.id, bucket_name=f"{user.username}-bucket"
         )
 
-        await uow.repo.add(user_storage)
+        await uow.storages.add(user_storage)
 
     UserResponse.model_validate(
         {
@@ -56,10 +56,7 @@ async def create_user(
 
 async def check_user_credentials(uow: AbstractUnitOfWork, user_credentials: UserLogin):
     async with uow:
-        stmt = select(User).where(User.username == user_credentials.username)
-
-        result = await uow.session.execute(stmt)
-        user = result.scalars().first()
+        user = await uow.users.get_by_username(user_credentials.username)
 
     if not user:
         raise LoginError("User not found")
@@ -70,17 +67,9 @@ async def check_user_credentials(uow: AbstractUnitOfWork, user_credentials: User
     raise LoginError()
 
 
-async def check_session(uow: AbstractUnitOfWork, session: Session):
-    async with uow:
-        result = await uow.session.execute(
-            select(Session).where(Session.user_fk == current_user.id)
-        )
-        session = result.scalars().first()
-
-
 async def create_session(uow: AbstractUnitOfWork, user_id: uuid.UUID):
     async with uow:
         session = Session(user_fk=user_id)
-        await uow.repo.add(session)
+        await uow.sessions.add(session)
 
     return session

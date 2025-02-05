@@ -33,7 +33,7 @@ async def get_files(
 ):
     file_list = []
     async with uow:
-        file_urls = await uow.repo.list(FileModel)
+        file_urls = await uow.files.list()
         for file in file_urls:
             file_list.append(
                 FileResponse.model_validate(
