@@ -82,7 +82,11 @@ class SessionRepository(AbstractRepository):
         return session
 
     async def get(self, session_id: uuid.UUID):
-        stmt = select(Session).where(Session.session_id == session_id)
+        stmt = stmt = (
+            select(Session)
+            .where(Session.session_id == uuid.UUID(session_id))
+            .options(selectinload(Session.user))
+        )
         result = await self.session.execute(stmt)
         return result.scalars().first()
 

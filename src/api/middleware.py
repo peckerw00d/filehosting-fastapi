@@ -12,7 +12,7 @@ from src.service_layer.unit_of_work import (
 from src.adapters.orm.models import Session
 
 
-async def get_user_from_session(session_id: uuid.UUID, uow: AbstractUnitOfWork):
+async def get_user_from_session(session_id: str, uow: AbstractUnitOfWork):
     async with uow:
         session = await uow.sessions.get(session_id)
         if not session:
@@ -31,7 +31,7 @@ async def session_middleware(request: Request, call_next):
     if session_id:
         uow = UnitOfWork()
         try:
-            user = await get_user_from_session(uuid.UUID(session_id), uow)
+            user = await get_user_from_session(session_id, uow)
             request.state.user = user
         except HTTPException as err:
             raise err
