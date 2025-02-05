@@ -69,10 +69,10 @@ async def logout(
     current_user: User = Depends(get_current_user),
 ):
     async with uow:
-        session = uow.sesions.get_by_user_fk(current_user.id)
+        session = await uow.sessions.get_by_user_fk(current_user.id)
 
         if session:
-            await uow.repo.delete(session)
+            await uow.sessions.delete(session)
 
     response.delete_cookie(key="session_id")
     return {"message": "Logged out successfully"}

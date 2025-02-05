@@ -100,6 +100,9 @@ class SessionRepository(AbstractRepository):
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
+    async def delete(self, session: Session):
+        await self.session.delete(session)
+
 
 class StorageRepository(AbstractRepository):
     def __init__(self, session: AsyncSession):
