@@ -23,7 +23,12 @@ async def get_user_from_session(session_id: str, uow: AbstractUnitOfWork):
 
 
 async def session_middleware(request: Request, call_next):
-    if request.url.path in ["/register", "/login"]:
+    if request.url.path in [
+        "/users/register",
+        "/users/login",
+        "/docs",
+        "/openapi.json",
+    ]:
         return await call_next(request)
 
     session_id = request.cookies.get("session_id")

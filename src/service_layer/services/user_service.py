@@ -46,30 +46,19 @@ async def create_user(
 
         await uow.storages.add(user_storage)
 
-    UserResponse.model_validate(
-        {
-            "username": user.username,
-            "email": user.email,
-        }
-    )
-
 
 async def check_user_credentials(uow: AbstractUnitOfWork, user_credentials: UserLogin):
     async with uow:
         user = await uow.users.get_by_username(user_credentials.username)
 
-    if not user:
-        raise LoginError("User not found")
+        if not user and verify_password(user.password_hash, user_credentials.password):
+            raise LoginError("Invalid credentials")
 
-    if verify_password(user.password_hash, user_credentials.password):
         return user
-
-    raise LoginError()
 
 
 async def create_session(uow: AbstractUnitOfWork, user_id: uuid.UUID):
     async with uow:
         session = Session(user_fk=user_id)
         await uow.sessions.add(session)
-
-    return session
+        return session

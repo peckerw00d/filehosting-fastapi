@@ -32,12 +32,15 @@ async def register(
         await user_service.create_user(
             uow=uow, user_data=user_data, storage_client=storage_client
         )
-        return RedirectResponse("/files/", status_code=302)
-
+        return {"message": "User registered successfully"}
     except S3Error as err:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create user: {err}",
+            detail=f"Failed to create user storage: {err}",
+        )
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err)
         )
 
 
@@ -50,16 +53,15 @@ async def login(
         user = await user_service.check_user_credentials(
             uow=uow, user_credentials=user_credentials
         )
+        session = await user_service.create_session(uow=uow, user_id=user.id)
+        response = Response(content="Logged in successfully", media_type="text/plain")
+        response.set_cookie(
+            key="session_id", value=str(session.session_id), httponly=True
+        )
+        return response
 
     except user_service.LoginError as err:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err))
-
-    session = await user_service.create_session(uow=uow, user_id=user.id)
-
-    response = RedirectResponse("/files/", status_code=302)
-    response.set_cookie(key="session_id", value=str(session.session_id), httponly=True)
-
-    return response
 
 
 @router.post("/logout")
