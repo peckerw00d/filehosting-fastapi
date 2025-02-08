@@ -8,7 +8,7 @@ from minio import Minio, S3Error
 from fastapi import HTTPException, UploadFile, status, Depends, Path
 from fastapi.responses import FileResponse as FastApiFileResponse
 
-from adapters.orm.models import FileModel
+from adapters.orm.models import FileModel, User
 from adapters.storage_client import AbstractStorageClient
 
 from api.schemas import FileResponse, FileCreate
@@ -28,37 +28,52 @@ class FileDeletingError(Exception):
     pass
 
 
-async def get_files(
-    uow: AbstractUnitOfWork, client: AbstractStorageClient, minio_settings: Settings
-):
-    file_list = []
-    async with uow:
-        file_urls = await uow.files.list()
-        for file in file_urls:
-            file_list.append(
-                FileResponse.model_validate(
-                    await client.get_file_metadata(minio_settings.bucket, file.file_url)
-                )
-            )
+class StorageError(Exception):
+    pass
+
+
+async def get_files(client: AbstractStorageClient, user: User):
+    if not user.storage:
+        raise StorageError("User has no storage associated")
+
+    storage_files = user.storage.files
+    if not storage_files:
+        raise FileNotFound("No files found in the user's storage")
+
+    file_list = [
+        FileResponse.model_validate(
+            await client.get_file_metadata(str(user.id), file.file_url)
+        )
+        for file in storage_files
+    ]
+
     return file_list
 
 
-async def get_file(
-    file_id: Annotated[int, Path],
-    client: AbstractStorageClient,
-    uow: AbstractUnitOfWork,
-    minio_settings: Settings,
-) -> FileResponse:
-    async with uow:
-        file = await uow.repo.get(entity=FileModel, entity_id=file_id)
-        if file is not None:
-            file_metadata = await client.get_file_metadata(
-                minio_settings.bucket,
-                file.file_url,
-            )
-            return FileResponse.model_validate(file_metadata)
+async def get_file_from_storage(file_url: str, storage_files):
+    for file in storage_files:
+        if file.file_url == file_url:
+            return file
+    raise FileNotFound(f"File with URL '{file_url}' not found in the user's storage")
 
-        raise Exception
+
+async def get_file(
+    file_url: Annotated[str, Path],
+    client: AbstractStorageClient,
+    user: User,
+) -> FileResponse:
+    if not user.storage:
+        raise StorageError("User has no storage associated")
+
+    storage_files = user.storage.files
+    if not storage_files:
+        raise FileNotFound("No files found in the user's storage")
+
+    file = await get_file_from_storage(file_url, storage_files)
+    file_metadata = FileResponse.model_validate(
+        await client.get_file_metadata(str(user.id), file.file_url)
+    )
+    return file_metadata
 
 
 def save_temp_file(file: UploadFile) -> str:
@@ -69,29 +84,26 @@ def save_temp_file(file: UploadFile) -> str:
 
 
 async def upload_file(
-    uow: AbstractUnitOfWork,
-    client: AbstractStorageClient,
-    file: UploadFile,
-    minio_settings: Settings,
+    uow: AbstractUnitOfWork, client: AbstractStorageClient, file: UploadFile, user: User
 ):
     file.filename = file.filename.lower()
     file_path = save_temp_file(file)
 
     try:
-        file_metadata = FileModel(file_url=str(uuid.uuid4()))
+        file_metadata = FileModel(
+            file_url=str(uuid.uuid4()), storage_id=user.storage.id
+        )
 
         await client.upload_file(
-            settings.minio.bucket,
+            str(user.id),
             file_metadata.file_url,
             file_path,
             file.filename,
         )
-        stat = await client.get_file_metadata(
-            minio_settings.bucket, file_metadata.file_url
-        )
+        stat = await client.get_file_metadata(str(user.id), file_metadata.file_url)
 
         async with uow:
-            await uow.repo.add(file_metadata)
+            await uow.files.add(file_metadata)
 
         return FileCreate.model_validate(stat)
 
@@ -102,17 +114,21 @@ async def upload_file(
         os.unlink(file_path)
 
 
-async def download_file(
-    file_url: str, client: AbstractStorageClient, minio_settings: Settings
-):
-    s3_object = await client.download_file(settings.minio.bucket, file_url)
+async def download_file(file_url: str, client: AbstractStorageClient, user: User):
+    if not user.storage:
+        raise StorageError("User has no storage associated")
+
+    storage_files = user.storage.files
+    file = await get_file_from_storage(file_url, storage_files)
+
+    s3_object = await client.download_file(str(user.id), file.file_url)
     content = s3_object.read()
 
     with NamedTemporaryFile(delete=False) as temp:
         temp.write(content)
         temp_path = temp.name
 
-    file_metadata = await client.get_file_metadata(minio_settings.bucket, file_url)
+    file_metadata = await client.get_file_metadata(str(user.id), file.file_url)
     response = FastApiFileResponse(
         path=temp_path,
         filename=file_metadata["filename"],
@@ -123,19 +139,19 @@ async def download_file(
 
 
 async def delete_file(
-    file_id: int,
-    uow: AbstractUnitOfWork,
-    client: AbstractStorageClient,
-    minio_settings: Settings,
+    file_url: str, uow: AbstractUnitOfWork, client: AbstractStorageClient, user: User
 ):
+    if not user.storage:
+        raise StorageError("User has no storage associated")
+
+    storage_files = user.storage.files
+    file = await get_file_from_storage(file_url, storage_files)
+
     async with uow:
-        file = await uow.repo.get(entity=FileModel, entity_id=file_id)
-        if not file:
-            raise FileNotFound()
         try:
-            await client.delete_file(settings.minio.bucket, file.file_url)
-            await uow.repo.delete(file)
-            return {"message": f"File {file_id} deleted!"}
+            await client.delete_file(str(user.id), file_url)
+            await uow.files.delete(file)
+            return {"message": f"File {file_url} deleted!"}
 
         except S3Error as err:
             raise FileDeletingError(err)

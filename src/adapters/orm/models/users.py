@@ -28,7 +28,9 @@ class UserStorage(Base):
     user_fk: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     bucket_name: Mapped[str] = mapped_column(String)
     user: Mapped["User"] = relationship(back_populates="storage", uselist=False)
-    files: Mapped["FileModel"] = relationship(back_populates="storage", uselist=True)
+    files: Mapped[List["FileModel"]] = relationship(
+        back_populates="storage", uselist=True
+    )
 
 
 class Session(Base):

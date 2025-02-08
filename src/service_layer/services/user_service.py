@@ -40,9 +40,7 @@ async def create_user(
         print(f"Failed to create bucket: {err}")
 
     async with uow:
-        user_storage = UserStorage(
-            user_fk=user.id, bucket_name=f"{user.username}-bucket"
-        )
+        user_storage = UserStorage(user_fk=user.id, bucket_name=str(user.id))
 
         await uow.storages.add(user_storage)
 

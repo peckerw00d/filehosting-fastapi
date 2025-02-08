@@ -6,7 +6,7 @@ from src.adapters.orm.models import FileModel, User, Session, UserStorage
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Result
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 
 class AbstractRepository(ABC):
@@ -61,6 +61,16 @@ class UserRepository(AbstractRepository):
 
     async def get_by_username(self, username: str):
         stmt = select(User).where(User.username == username)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
+    async def get_user_by_session_id(self, session_id: uuid.UUID):
+        stmt = (
+            select(User)
+            .join(Session, User.id == Session.user_fk)
+            .options(joinedload(User.storage).selectinload(UserStorage.files))
+            .where(Session.session_id == session_id)
+        )
         result = await self.session.execute(stmt)
         return result.scalars().first()
 

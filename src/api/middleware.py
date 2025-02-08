@@ -14,12 +14,12 @@ from src.adapters.orm.models import Session
 
 async def get_user_from_session(session_id: str, uow: AbstractUnitOfWork):
     async with uow:
-        session = await uow.sessions.get(session_id)
-        if not session:
+        user = await uow.users.get_user_by_session_id(session_id)
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid session"
             )
-        return session.user
+        return user
 
 
 async def session_middleware(request: Request, call_next):
