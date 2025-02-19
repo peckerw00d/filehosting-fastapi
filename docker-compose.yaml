@@ -1,4 +1,23 @@
+version: '3.9'
+
 services:
+  app:
+    container_name: "app"
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DB_URL: postgresql+asyncpg://postgres:postgres@db:5432/postgres
+      MINIO_ACCESS_KEY: minio-user
+      MINIO_SECRET_KEY: minio-password
+      MINIO_BUCKET: main-bucket
+    depends_on:
+      - db
+      - storage
+    networks:
+      - custom
+
   db:
     container_name: "db"
     image: postgres:14.1-alpine
@@ -11,6 +30,7 @@ services:
       - "5433:5432"
     networks:
       - custom
+
   test-db:
     container_name: "test-db"
     image: postgres:14.1-alpine
@@ -23,7 +43,8 @@ services:
       - "5434:5432"
     networks:
       - custom
-  minio:
+
+  storage:
     container_name: "storage"
     image: minio/minio
     command: ["server", "/data"]
